@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cấu trúc thư mục - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Cấu trúc thư mục chuẩn cho Classic Theme trong WordPress.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html" class="active">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Cấu trúc thư mục</h1>
+            <p class="lead">Sắp xếp các thư mục và tập tin trong theme rõ ràng, phục vụ mở rộng và bảo trì lâu dài.</p>
+
+            <pre class="tree"><code>ten-theme/
+├── style.css              <span class="c"># bắt buộc</span>
+├── index.php              <span class="c"># bắt buộc, dự phòng cuối</span>
+├── functions.php
+├── header.php  footer.php  sidebar.php  comments.php
+├── search.php  404.php
+│
+├── page/                  <span class="c"># trang tĩnh (post type page)</span>
+│   ├── front-page.php       <span class="c"># trang chủ</span>
+│   ├── home.php             <span class="c"># trang blog</span>
+│   ├── page.php             <span class="c"># mọi trang còn lại</span>
+│   └── page-lien-he.php     <span class="c"># riêng slug lien-he</span>
+├── single/                <span class="c"># chi tiết một bài</span>
+│   ├── single.php           <span class="c"># post và custom post type</span>
+│   ├── single-san-pham.php  <span class="c"># riêng post type san-pham</span>
+│   └── singular.php         <span class="c"># dự phòng chung post + page</span>
+├── archive/               <span class="c"># danh sách bài</span>
+│   ├── archive.php          <span class="c"># dự phòng mọi danh sách</span>
+│   ├── category.php  tag.php  author.php
+│   ├── taxonomy-loai-san-pham.php
+│   └── archive-san-pham.php
+├── templates/             <span class="c"># Page Template chọn tay (Template Name:)</span>
+├── template-parts/        <span class="c"># phần dùng lại</span>
+│   ├── section/  loop/  content/  ui/  layout/  form/
+├── inc/
+│   ├── template-loader.php
+│   ├── custom-post-types.php
+│   ├── custom-taxonomies.php
+│   └── fields/            <span class="c"># custom field thay ACF</span>
+└── assets/  css/ js/ images/ fonts/</code></pre>
+            <p>Tên <code>{key}</code> trong <code>single-{key}.php</code> hoặc <code>taxonomy-{key}.php</code> là key
+                trong <code>register_post_type()</code> / <code>register_taxonomy()</code>, không phải label hiển thị.
+            </p>
+
+            <div class="page-nav">
+                <a href="index.html">← Bắt đầu</a>
+                <a href="thu-tu.html" class="next">Thứ tự chọn template →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

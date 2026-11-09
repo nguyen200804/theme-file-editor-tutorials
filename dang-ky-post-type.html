@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký Post Type, Taxonomy, Option Page - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Hướng dẫn đăng ký Custom Post Type, Custom Taxonomy và Option Page bằng code chuẩn WordPress không cần plugin.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html" class="active">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Đăng ký Post Type, Taxonomy và Option Page</h1>
+            <p class="lead">Cách mở rộng cấu trúc dữ liệu cho WordPress: tạo các loại bài viết mới (Dự án, Sản phẩm), các nhóm phân loại tùy biến và trang cấu hình chung toàn site bằng mã nguồn PHP gốc.</p>
+
+            <!-- MỤC 1: CUSTOM POST TYPE -->
+            <h2>1. Đăng ký Custom Post Type (CPT)</h2>
+            <p>Dùng hàm <code>register_post_type()</code> móc vào hook <code>init</code>. Tạo file tại <code>inc/custom-post-types.php</code>:</p>
+
+            <h3>Các tham số cốt lõi cần nhớ:</h3>
+            <table>
+                <tr>
+                    <th>Tham số</th>
+                    <th>Ý nghĩa &amp; Giá trị khuyên dùng</th>
+                </tr>
+                <tr>
+                    <td><code>labels</code></td>
+                    <td>Mảng tên hiển thị trong Admin (Tên menu, Thêm mới, Sửa bài...).</td>
+                </tr>
+                <tr>
+                    <td><code>public</code></td>
+                    <td><code>true</code> để bài viết hiển thị ra ngoài website và có giao diện quản trị.</td>
+                </tr>
+                <tr>
+                    <td><code>has_archive</code></td>
+                    <td><code>true</code> để kích hoạt trang danh sách (ví dụ: <code>domain.com/du-an/</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>rewrite</code></td>
+                    <td><code>array('slug' =&gt; 'du-an')</code> định nghĩa đường dẫn URL tĩnh.</td>
+                </tr>
+                <tr>
+                    <td><code>supports</code></td>
+                    <td>Các tính năng bật cho bài viết: <code>title</code>, <code>editor</code>, <code>thumbnail</code>, <code>excerpt</code>...</td>
+                </tr>
+                <tr>
+                    <td><code>menu_icon</code></td>
+                    <td>Icon menu Admin (lấy từ <a href="https://developer.wordpress.org/resource/dashicons/" target="_blank" rel="noopener">WordPress Dashicons</a>).</td>
+                </tr>
+                <tr>
+                    <td><code>show_in_rest</code></td>
+                    <td><code>true</code> nếu muốn dùng trình soạn thảo khối Gutenberg; <code>false</code> để dùng Classic Editor.</td>
+                </tr>
+            </table>
+
+            <h3>Code mẫu: Đăng ký Post Type "Dự án" (du-an)</h3>
+            <pre><code>&lt;?php
+// inc/custom-post-types.php
+function ten_register_custom_post_types() {
+    $labels = array(
+        'name'               =&gt; 'Dự án',
+        'singular_name'      =&gt; 'Dự án',
+        'menu_name'          =&gt; 'Dự án',
+        'add_new'            =&gt; 'Thêm dự án',
+        'add_new_item'       =&gt; 'Thêm dự án mới',
+        'edit_item'          =&gt; 'Chỉnh sửa dự án',
+        'new_item'           =&gt; 'Dự án mới',
+        'view_item'          =&gt; 'Xem dự án',
+        'search_items'       =&gt; 'Tìm kiếm dự án',
+        'not_found'          =&gt; 'Không tìm thấy dự án nào',
+        'not_found_in_trash' =&gt; 'Thùng rác trống',
+    );
+
+    $args = array(
+        'labels'              =&gt; $labels,
+        'public'              =&gt; true,
+        'has_archive'         =&gt; true,            // Bắt buộc bật để có trang /du-an/
+        'publicly_queryable'  =&gt; true,
+        'query_var'           =&gt; true,
+        'rewrite'             =&gt; array( 'slug' =&gt; 'du-an', 'with_front' =&gt; false ),
+        'capability_type'     =&gt; 'post',
+        'hierarchical'        =&gt; false,
+        'menu_position'       =&gt; 5,               // Đặt ngay dưới mục Bài viết
+        'menu_icon'           =&gt; 'dashicons-portfolio', // Icon portfolio
+        'supports'            =&gt; array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'show_in_rest'        =&gt; false,           // Đổi thành true nếu muốn dùng Gutenberg
+    );
+
+    register_post_type( 'du-an', $args );
+}
+add_action( 'init', 'ten_register_custom_post_types' );</code></pre>
+
+            <div class="note">
+                <strong>LƯU Ý BẮT BUỘC:</strong> Sau khi thêm hoặc đổi slug Post Type, bạn phải vào <strong>Settings → Permalinks (Cài đặt → Đường dẫn tĩnh) và nhấn "Save Changes" (Lưu thay đổi)</strong> để cập nhật rewrite rule, nếu không vào <code>/du-an/</code> sẽ bị lỗi 404!
+            </div>
+
+            <!-- MỤC 2: CUSTOM TAXONOMY -->
+            <h2>2. Đăng ký Custom Taxonomy (Phân loại tùy biến)</h2>
+            <p>Dùng hàm <code>register_taxonomy()</code> móc vào hook <code>init</code> để tạo chuyên mục riêng cho Post Type. Tạo file tại <code>inc/custom-taxonomies.php</code>:</p>
+
+            <h3>Tham số quan trọng: <code>hierarchical</code></h3>
+            <ul>
+                <li><code>'hierarchical' =&gt; true</code>: Hoạt động giống <strong>Chuyên mục (Category)</strong> — có phân cấp Cha / Con và tích chọn checkbox.</li>
+                <li><code>'hierarchical' =&gt; false</code>: Hoạt động giống <strong>Thẻ (Tag)</strong> — gõ chữ và gắn tag bằng dấu phẩy.</li>
+            </ul>
+
+            <h3>Code mẫu: Đăng ký "Loại dự án" (loai-du-an) cho Post Type "du-an"</h3>
+            <pre><code>&lt;?php
+// inc/custom-taxonomies.php
+function ten_register_custom_taxonomies() {
+    $labels = array(
+        'name'              =&gt; 'Loại dự án',
+        'singular_name'     =&gt; 'Loại dự án',
+        'search_items'      =&gt; 'Tìm kiếm loại dự án',
+        'all_items'         =&gt; 'Tất cả loại dự án',
+        'parent_item'       =&gt; 'Loại dự án cha',
+        'parent_item_colon' =&gt; 'Loại dự án cha:',
+        'edit_item'         =&gt; 'Chỉnh sửa loại dự án',
+        'update_item'       =&gt; 'Cập nhật loại dự án',
+        'add_new_item'      =&gt; 'Thêm loại dự án mới',
+        'new_item_name'     =&gt; 'Tên loại dự án mới',
+        'menu_name'         =&gt; 'Loại dự án',
+    );
+
+    $args = array(
+        'hierarchical'      =&gt; true,                      // Dạng danh mục có cha/con
+        'labels'            =&gt; $labels,
+        'show_ui'           =&gt; true,
+        'show_admin_column' =&gt; true,                      // Hiện cột chuyên mục trong danh sách bài Admin
+        'query_var'         =&gt; true,
+        'rewrite'           =&gt; array( 'slug' =&gt; 'loai-du-an', 'with_front' =&gt; false ),
+        'show_in_rest'      =&gt; false,
+    );
+
+    // Gắn taxonomy này vào post type 'du-an'
+    register_taxonomy( 'loai-du-an', array( 'du-an' ), $args );
+}
+add_action( 'init', 'ten_register_custom_taxonomies' );</code></pre>
+
+            <!-- MỤC 3: OPTION PAGE -->
+            <h2>3. Đăng ký Option Page (Trang cài đặt Theme)</h2>
+            <p>Tạo một trang riêng trong thanh menu Admin để lưu cấu hình chung (Hotline, Email, Bản quyền...). Tạo file tại <code>inc/options-page.php</code>:</p>
+
+            <h3>Code mẫu hoàn chỉnh dùng Settings API của WordPress:</h3>
+            <pre><code>&lt;?php
+// inc/options-page.php
+
+// 1. Tạo Menu trong Admin
+function ten_register_theme_options_menu() {
+    add_menu_page(
+        'Cài đặt Website',             // Tiêu đề trang
+        'Cài đặt Theme',               // Tên hiển thị trên Menu
+        'manage_options',              // Quyền truy cập (chỉ Admin)
+        'theme-settings',              // Slug menu
+        'ten_render_theme_options_page', // Hàm vẽ giao diện form
+        'dashicons-admin-generic',     // Icon bánh răng
+        60                             // Vị trí menu
+    );
+}
+add_action( 'admin_menu', 'ten_register_theme_options_menu' );
+
+// 2. Đăng ký nhóm cài đặt với WordPress (Lưu vào bảng wp_options)
+function ten_register_theme_settings() {
+    register_setting( 'theme_options_group', 'theme_options' );
+}
+add_action( 'admin_init', 'ten_register_theme_settings' );
+
+// 3. Hàm vẽ giao diện Form cài đặt
+function ten_render_theme_options_page() {
+    $options = get_option( 'theme_options', array() );
+    ?&gt;
+    &lt;div class="wrap"&gt;
+        &lt;h1&gt;Cài đặt chung Website&lt;/h1&gt;
+        &lt;form method="post" action="options.php"&gt;
+            &lt;?php
+            settings_fields( 'theme_options_group' );
+            ?&gt;
+            &lt;table class="form-table"&gt;
+                &lt;tr&gt;
+                    &lt;th scope="row"&gt;&lt;label for="hotline"&gt;Số Hotline&lt;/label&gt;&lt;/th&gt;
+                    &lt;td&gt;
+                        &lt;input type="text" id="hotline" name="theme_options[hotline]" 
+                               value="&lt;?php echo esc_attr( $options['hotline'] ?? '' ); ?&gt;" class="regular-text"&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;th scope="row"&gt;&lt;label for="email"&gt;Email liên hệ&lt;/label&gt;&lt;/th&gt;
+                    &lt;td&gt;
+                        &lt;input type="email" id="email" name="theme_options[email]" 
+                               value="&lt;?php echo esc_attr( $options['email'] ?? '' ); ?&gt;" class="regular-text"&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;th scope="row"&gt;&lt;label for="footer_copy"&gt;Bản quyền Footer&lt;/label&gt;&lt;/th&gt;
+                    &lt;td&gt;
+                        &lt;input type="text" id="footer_copy" name="theme_options[footer_copy]" 
+                               value="&lt;?php echo esc_attr( $options['footer_copy'] ?? '' ); ?&gt;" class="large-text"&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/table&gt;
+            &lt;?php submit_button( 'Lưu thay đổi' ); ?&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+    &lt;?php
+}
+
+// 4. Hàm helper gọi nhanh ngoài Frontend
+function ten_get_option( $key, $default = '' ) {
+    $options = get_option( 'theme_options', array() );
+    return $options[$key] ?? $default;
+}</code></pre>
+
+            <h3>Cách gọi dữ liệu ngoài template (header.php, footer.php):</h3>
+            <pre><code>&lt;!-- Lấy số Hotline trong header.php --&gt;
+&lt;a href="tel:&lt;?php echo esc_attr( ten_get_option( 'hotline' ) ); ?&gt;"&gt;
+    &lt;?php echo esc_html( ten_get_option( 'hotline' ) ); ?&gt;
+&lt;/a&gt;
+
+&lt;!-- Lấy bản quyền trong footer.php --&gt;
+&lt;p&gt;&amp;copy; &lt;?php echo esc_html( ten_get_option( 'footer_copy' ) ); ?&gt;&lt;/p&gt;</code></pre>
+
+            <div class="page-nav">
+                <a href="page-cung.html">← Tạo Page cứng</a>
+                <a href="archive.html" class="next">Tạo Template Archive →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

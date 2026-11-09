@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gom file vào folder - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Cách gom template vào các thư mục page/, single/, archive/ bằng template loader trong WordPress.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html" class="active">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Gom file vào folder</h1>
+            <p class="lead">Mặc định WordPress chỉ quét file ở thư mục gốc theme. Sử dụng bộ nạp template để gom file vào các folder con gọn gàng.</p>
+
+            <p>Thêm file <code>inc/template-loader.php</code> để WordPress tìm trong <code>page/</code>, <code>single/</code>, <code>archive/</code> trước, rồi mới tới thư mục gốc:</p>
+            <pre><code>&lt;?php
+$template_folders = array(
+    'frontpage' =&gt; 'page',    'home'     =&gt; 'page',
+    'page'      =&gt; 'page',    'single'   =&gt; 'single',
+    'singular'  =&gt; 'single',  'attachment' =&gt; 'single',
+    'archive'   =&gt; 'archive', 'category' =&gt; 'archive',
+    'tag'       =&gt; 'archive', 'taxonomy' =&gt; 'archive',
+    'author'    =&gt; 'archive', 'date'     =&gt; 'archive',
+);
+
+foreach ( $template_folders as $type =&gt; $folder ) {
+    add_filter( "{$type}_template_hierarchy", function ( $templates ) use ( $folder ) {
+        $result = array();
+        foreach ( $templates as $template ) {
+            if ( false === strpos( $template, '/' ) ) {
+                $result[] = $folder . '/' . $template;
+            }
+            $result[] = $template;
+        }
+        return $result;
+    } );
+}</code></pre>
+            <p>Nạp file này trong <code>functions.php</code>:</p>
+            <pre><code>require_once get_stylesheet_directory() . '/inc/template-loader.php';</code></pre>
+
+            <div class="note">
+                Page Template có khai báo <code>Template Name:</code> đặt trong thư mục <code>templates/</code>. WordPress đã tự động hỗ trợ quét một cấp thư mục con cho loại này mà không cần hook thêm.
+            </div>
+
+            <div class="page-nav">
+                <a href="thu-tu.html">← Thứ tự chọn template</a>
+                <a href="template-parts.html" class="next">Template parts →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

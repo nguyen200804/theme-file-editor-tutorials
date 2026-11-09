@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Custom field thay ACF - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Bộ khung custom field tự viết bằng meta box gốc thay thế Advanced Custom Fields (ACF): Field Group, Post Type, Taxonomy, Option Page.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html" class="active">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Custom field thay ACF</h1>
+            <p class="lead">Bộ khung nhỏ dùng meta box gốc của WordPress: khai báo field bằng mảng, tự động vẽ form, kiểm tra nonce bảo mật, lọc dữ liệu sạch và lưu trữ nhẹ hơn nhiều so với cài plugin ACF.</p>
+
+            <pre><code>inc/fields/
+├── loader.php        <span class="c"># nạp các file bên dưới</span>
+├── core.php          <span class="c"># đăng ký meta box, vẽ input, lưu post meta</span>
+├── helpers.php       <span class="c"># hàm lấy dữ liệu: ten_field(), ten_term_field(), ten_option()</span>
+├── term-meta.php     <span class="c"># custom field cho Category &amp; Taxonomy</span>
+├── options-page.php  <span class="c"># trang cài đặt chung cho website (Theme Options)</span>
+└── config/           <span class="c"># mỗi nhóm field một file cấu hình</span>
+    ├── san-pham.php
+    ├── taxonomy.php
+    └── theme-settings.php
+assets/js/admin-fields.js   <span class="c"># xử lý chọn ảnh Media Library, gallery, repeater</span></code></pre>
+
+            <p>Mã nguồn đầy đủ của <code>core.php</code>, <code>helpers.php</code>, <code>term-meta.php</code>, <code>options-page.php</code> và <code>admin-fields.js</code> đặt trong thư mục <code>theme-code/</code> của repo này.</p>
+
+            <!-- MỤC 1: FIELD GROUP -->
+            <h2>1. Field Group (Nhóm trường dữ liệu)</h2>
+            <p><strong>Field Group</strong> là khái niệm cốt lõi dùng để gom các trường dữ liệu liên quan lại thành một nhóm hoàn chỉnh. Một Field Group bao gồm: tên nhóm, vị trí hiển thị và danh sách các trường dữ liệu con.</p>
+
+            <table>
+                <tr>
+                    <th>Đối tượng áp dụng</th>
+                    <th>Vị trí xuất hiện trong Admin</th>
+                    <th>Bảng lưu trong Database</th>
+                </tr>
+                <tr>
+                    <td><strong>Post Type</strong> (Bài viết, Trang, CPT)</td>
+                    <td>Hiển thị dạng hộp Meta Box ở giữa hoặc cột phải trang soạn thảo</td>
+                    <td><code>wp_postmeta</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Taxonomy</strong> (Category, Tag, Custom Taxonomy)</td>
+                    <td>Hiển thị các ô nhập liệu bổ sung trong trang Sửa danh mục</td>
+                    <td><code>wp_termmeta</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Option Page</strong> (Cài đặt chung toàn website)</td>
+                    <td>Hiển thị thành từng khối / section trong trang Theme Settings</td>
+                    <td><code>wp_options</code></td>
+                </tr>
+            </table>
+
+            <h3>📐 Công thức cấu tạo tổng quát của một Field Group:</h3>
+            <pre><code>ten_add_meta_box( array(
+    // 1. Nhận diện nhóm (Bắt buộc)
+    'id'         =&gt; '{id_nhom_duy_nhat}',         // Chuỗi không dấu, không trùng lặp
+    'title'      =&gt; '{Tiêu đề hộp hiển thị}',     // Tên nhóm xuất hiện trên giao diện Admin
+    
+    // 2. Vị trí gán (Location)
+    'post_types' =&gt; array( '{slug_post_type}' ),  // Áp dụng cho: 'post', 'page', hoặc CPT
+    'template'   =&gt; '{duong_dan_template}',       // (Tùy chọn) Chỉ hiện khi chọn đúng Page Template
+    
+    // 3. Vị trí &amp; Thứ tự trên màn hình
+    'context'    =&gt; 'normal',                     // 'normal' (ở giữa) hoặc 'side' (cột bên phải)
+    'priority'   =&gt; 'high',                       // 'high' (ưu tiên trên cùng) hoặc 'default'
+    
+    // 4. Danh sách các trường dữ liệu con (Fields Array)
+    'fields'     =&gt; array(
+        array( 'key' =&gt; '{key_1}', 'label' =&gt; '{Nhãn 1}', 'type' =&gt; '{kieu_field}' ),
+        array( 'key' =&gt; '{key_2}', 'label' =&gt; '{Nhãn 2}', 'type' =&gt; '{kieu_field}' ),
+    ),
+) );</code></pre>
+
+            <h3>💡 Ví dụ thực tế 1: Field Group lọc theo Page Template Giới thiệu</h3>
+            <p>Nhóm trường chỉ hiển thị khi trang tĩnh chọn template <code>templates/page-about.php</code>:</p>
+            <pre><code>// inc/fields/config/page-about.php
+ten_add_meta_box( array(
+    'id'         =&gt; 'thong_ke_gioi_thieu',
+    'title'      =&gt; 'Các con số ấn tượng (Thống kê)',
+    'post_types' =&gt; array( 'page' ),
+    'template'   =&gt; 'templates/page-about.php', // Chỉ kích hoạt khi gán đúng Template
+    'context'    =&gt; 'normal',
+    'fields'     =&gt; array(
+        array( 'key' =&gt; 'nam_kinh_nghiem', 'label' =&gt; 'Số năm kinh nghiệm',   'type' =&gt; 'number' ),
+        array( 'key' =&gt; 'so_khach_hang',   'label' =&gt; 'Khách hàng tin tưởng', 'type' =&gt; 'number' ),
+        array( 'key' =&gt; 'so_du_an',        'label' =&gt; 'Dự án đã bàn giao',    'type' =&gt; 'number' ),
+    ),
+) );
+
+// Lấy ra dùng trong templates/page-about.php:
+&lt;div class="stats-grid"&gt;
+    &lt;div class="stat-item"&gt;&lt;?php echo esc_html( ten_field( 'nam_kinh_nghiem' ) ); ?&gt;+ Năm&lt;/div&gt;
+    &lt;div class="stat-item"&gt;&lt;?php echo esc_html( ten_field( 'so_khach_hang' ) ); ?&gt;+ Khách hàng&lt;/div&gt;
+    &lt;div class="stat-item"&gt;&lt;?php echo esc_html( ten_field( 'so_du_an' ) ); ?&gt;+ Dự án&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            <h3>💡 Ví dụ thực tế 2: Field Group hiển thị ở cột bên phải (Side Box)</h3>
+            <p>Nhóm trường nhỏ hiển thị gọn ở cột bên phải màn hình viết bài:</p>
+            <pre><code>// inc/fields/config/post-extra.php
+ten_add_meta_box( array(
+    'id'         =&gt; 'nguon_bai_viet',
+    'title'      =&gt; 'Nguồn &amp; Bản quyền bài viết',
+    'post_types' =&gt; array( 'post' ),
+    'context'    =&gt; 'side', // Hiển thị ở cột bên phải
+    'priority'   =&gt; 'default',
+    'fields'     =&gt; array(
+        array( 'key' =&gt; 'tac_gia_goc', 'label' =&gt; 'Tác giả gốc', 'type' =&gt; 'text' ),
+        array( 'key' =&gt; 'link_nguon',   'label' =&gt; 'Link bài viết gốc', 'type' =&gt; 'url' ),
+    ),
+) );</code></pre>
+
+            <!-- MỤC 2: POST TYPE -->
+            <h2>2. Post Type (Áp dụng cho Bài viết &amp; Custom Post Type)</h2>
+            <p>Dùng để thêm các trường dữ liệu riêng biệt cho từng bài viết, trang tĩnh hoặc custom post type (sản phẩm, dự án, dịch vụ...). Dữ liệu lưu vào bảng <code>wp_postmeta</code>.</p>
+
+            <h3>📐 Công thức:</h3>
+            <pre><code>// 1. Công thức Khai báo (inc/fields/config/{post-type}.php)
+ten_add_meta_box( array(
+    'id'         =&gt; '{id_nhom}',                  // Mã định danh nhóm (duy nhất)
+    'title'      =&gt; '{Tiêu đề hộp Meta Box}',    // Tên hiển thị trên thanh tiêu đề
+    'post_types' =&gt; array( '{slug_post_type}' ),  // Áp dụng cho: 'post', 'page', hoặc CPT
+    'context'    =&gt; 'normal',                     // Vị trí: 'normal' (chính giữa) hoặc 'side' (cột phải)
+    'fields'     =&gt; array(
+        array( 'key' =&gt; '{key_1}', 'label' =&gt; '{Nhãn 1}', 'type' =&gt; '{kieu_field}' ),
+        array( 'key' =&gt; '{key_2}', 'label' =&gt; '{Nhãn 2}', 'type' =&gt; '{kieu_field}' ),
+    ),
+) );
+
+// 2. Công thức Lấy dữ liệu (trong single-{post_type}.php hoặc loop/card.php)
+&lt;?php echo esc_html( ten_field( '{key_1}' ) ); ?&gt;</code></pre>
+
+            <h3>💡 Ví dụ thực tế: Thêm thông tin cho Post Type Sản phẩm</h3>
+            <pre><code>// Khai báo trong inc/fields/config/san-pham.php
+ten_add_meta_box( array(
+    'id'         =&gt; 'thong-tin-san-pham',
+    'title'      =&gt; 'Thông tin sản phẩm',
+    'post_types' =&gt; array( 'san-pham' ),
+    'context'    =&gt; 'normal',
+    'fields'     =&gt; array(
+        array( 'key' =&gt; 'gia',       'label' =&gt; 'Giá bán (đ)',       'type' =&gt; 'number' ),
+        array( 'key' =&gt; 'bao_hanh',  'label' =&gt; 'Thời gian bảo hành', 'type' =&gt; 'text' ),
+        array( 'key' =&gt; 'album_anh', 'label' =&gt; 'Album ảnh chi tiết', 'type' =&gt; 'gallery' ),
+    ),
+) );
+
+// Lấy ra hiển thị trong single-san-pham.php:
+&lt;div class="product-info"&gt;
+    &lt;p&gt;Giá: &lt;strong&gt;&lt;?php echo esc_html( number_format_i18n( ten_field( 'gia' ) ) ); ?&gt; đ&lt;/strong&gt;&lt;/p&gt;
+    &lt;p&gt;Bảo hành: &lt;?php echo esc_html( ten_field( 'bao_hanh' ) ); ?&gt;&lt;/p&gt;
+    &lt;div class="gallery"&gt;
+        &lt;?php echo ten_gallery( 'album_anh' ); ?&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            <!-- MỤC 3: TAXONOMY -->
+            <h2>3. Taxonomy (Áp dụng cho Chuyên mục &amp; Phân loại)</h2>
+            <p>Dùng để bổ sung thêm các trường tùy biến vào trang Thêm / Sửa Danh mục (như banner, icon, màu sắc). Dữ liệu lưu vào bảng <code>wp_termmeta</code>.</p>
+
+            <h3>📐 Công thức:</h3>
+            <pre><code>// 1. Công thức Khai báo (inc/fields/config/taxonomy.php)
+ten_add_term_fields( array(
+    'taxonomy' =&gt; '{slug_taxonomy}', // Áp dụng cho: 'category', 'post_tag', hoặc custom taxonomy
+    'fields'   =&gt; array(
+        array( 'key' =&gt; '{key_1}', 'label' =&gt; '{Nhãn 1}', 'type' =&gt; '{kieu_field}' ),
+    ),
+) );
+
+// 2. Công thức Lấy dữ liệu (trong category.php, taxonomy.php hoặc archive.php)
+&lt;?php
+$term_id = get_queried_object_id(); // Lấy ID của term đang xem
+echo esc_html( ten_term_field( $term_id, '{key_1}' ) );
+?&gt;</code></pre>
+
+            <h3>💡 Ví dụ thực tế: Thêm Banner &amp; Mã màu cho Loại sản phẩm</h3>
+            <pre><code>// Khai báo trong inc/fields/config/taxonomy.php
+ten_add_term_fields( array(
+    'taxonomy' =&gt; 'loai-san-pham',
+    'fields'   =&gt; array(
+        array( 'key' =&gt; 'anh_banner', 'label' =&gt; 'Ảnh Banner đầu trang', 'type' =&gt; 'image' ),
+        array( 'key' =&gt; 'mau_chu_dao', 'label' =&gt; 'Mã màu chủ đạo (#hex)', 'type' =&gt; 'text' ),
+    ),
+) );
+
+// Lấy ra hiển thị trong taxonomy-loai-san-pham.php:
+&lt;?php
+$term_id   = get_queried_object_id();
+$banner_id = ten_term_field( $term_id, 'anh_banner' );
+$color     = ten_term_field( $term_id, 'mau_chu_dao' );
+?&gt;
+&lt;header class="tax-header" style="background-color: &lt;?php echo esc_attr( $color ); ?&gt;;"&gt;
+    &lt;?php if ( $banner_id ) : ?&gt;
+        &lt;?php echo wp_get_attachment_image( $banner_id, 'full', false, array( 'class' =&gt; 'tax-banner' ) ); ?&gt;
+    &lt;?php endif; ?&gt;
+    &lt;h1&gt;&lt;?php single_term_title(); ?&gt;&lt;/h1&gt;
+&lt;/header&gt;</code></pre>
+
+            <!-- MỤC 4: OPTION PAGE -->
+            <h2>4. Option Page (Trang cài đặt chung toàn site - Theme Settings)</h2>
+            <p>Dùng để tạo một trang quản trị tập trung lưu các cấu hình dùng chung toàn site (Logo, Hotline, Email, Bản quyền, Mã Google Analytics...). Dữ liệu lưu vào bảng <code>wp_options</code>.</p>
+
+            <h3>📐 Công thức:</h3>
+            <pre><code>// 1. Công thức Khai báo (inc/fields/config/theme-settings.php)
+ten_add_options_page( array(
+    'page_title' =&gt; '{Tiêu đề trang}',       // Tiêu đề trang quản trị
+    'menu_title' =&gt; '{Tên menu}',            // Tên hiển thị trên menu Admin
+    'menu_slug'  =&gt; '{slug_trang_cai_dat}',   // Slug URL trong admin
+    'icon'       =&gt; 'dashicons-admin-generic', // Icon dashicon
+    'fields'     =&gt; array(
+        array( 'key' =&gt; '{key_1}', 'label' =&gt; '{Nhãn 1}', 'type' =&gt; '{kieu_field}' ),
+    ),
+) );
+
+// 2. Công thức Lấy dữ liệu (ở bất kỳ file nào: header.php, footer.php...)
+&lt;?php echo esc_html( ten_option( '{key_1}' ) ); ?&gt;</code></pre>
+
+            <h3>💡 Ví dụ thực tế: Cài đặt Hotline, Email và Bản quyền Footer</h3>
+            <pre><code>// Khai báo trong inc/fields/config/theme-settings.php
+ten_add_options_page( array(
+    'page_title' =&gt; 'Cài đặt chung Website',
+    'menu_title' =&gt; 'Cài đặt Theme',
+    'menu_slug'  =&gt; 'theme-settings',
+    'icon'       =&gt; 'dashicons-admin-generic',
+    'fields'     =&gt; array(
+        array( 'key' =&gt; 'hotline',     'label' =&gt; 'Số Hotline',      'type' =&gt; 'text' ),
+        array( 'key' =&gt; 'email',       'label' =&gt; 'Email liên hệ',   'type' =&gt; 'email' ),
+        array( 'key' =&gt; 'footer_copy', 'label' =&gt; 'Bản quyền Footer','type' =&gt; 'text' ),
+    ),
+) );
+
+// Lấy ra trong header.php (Hotline):
+&lt;a href="tel:&lt;?php echo esc_attr( ten_option( 'hotline' ) ); ?&gt;" class="header-hotline"&gt;
+    Hotline: &lt;?php echo esc_html( ten_option( 'hotline' ) ); ?&gt;
+&lt;/a&gt;
+
+// Lấy ra trong footer.php (Bản quyền):
+&lt;footer class="site-footer"&gt;
+    &lt;p&gt;&amp;copy; &lt;?php echo date('Y'); ?&gt; &lt;?php echo esc_html( ten_option( 'footer_copy' ) ); ?&gt;&lt;/p&gt;
+&lt;/footer&gt;</code></pre>
+
+            <!-- BẢNG TỔNG HỢP KIỂU TRƯỜNG -->
+            <h2>5. Các kiểu trường hỗ trợ &amp; cách lấy dữ liệu</h2>
+            <table>
+                <tr>
+                    <th><code>type</code></th>
+                    <th>Kiểu dữ liệu lưu</th>
+                    <th>Hàm lấy trong Template</th>
+                </tr>
+                <tr>
+                    <td><code>text</code>, <code>date</code>, <code>number</code>, <code>select</code></td>
+                    <td>Chuỗi / số</td>
+                    <td><code>ten_field('key')</code></td>
+                </tr>
+                <tr>
+                    <td><code>url</code>, <code>email</code></td>
+                    <td>Chuỗi định dạng</td>
+                    <td><code>esc_url( ten_field('key') )</code></td>
+                </tr>
+                <tr>
+                    <td><code>textarea</code></td>
+                    <td>Đoạn văn bản nhiều dòng</td>
+                    <td><code>nl2br( esc_html( ten_field('key') ) )</code></td>
+                </tr>
+                <tr>
+                    <td><code>checkbox</code></td>
+                    <td><code>'1'</code> hoặc <code>'0'</code></td>
+                    <td><code>'1' === ten_field('key')</code></td>
+                </tr>
+                <tr>
+                    <td><code>image</code></td>
+                    <td>ID file ảnh trong Media</td>
+                    <td><code>ten_image('key', 'size')</code></td>
+                </tr>
+                <tr>
+                    <td><code>gallery</code></td>
+                    <td>Mảng danh sách các ID ảnh</td>
+                    <td><code>ten_gallery('key')</code></td>
+                </tr>
+                <tr>
+                    <td><code>repeater</code></td>
+                    <td>Mảng dữ liệu nhiều hàng</td>
+                    <td><code>foreach ( ten_field('key') as $row )</code></td>
+                </tr>
+            </table>
+
+            <h2>6. Nguyên tắc an toàn &amp; tối ưu</h2>
+            <ul>
+                <li><strong>Đặt key rõ ràng:</strong> Đặt <code>key</code> chữ thường không dấu, dùng dấu gạch dưới (VD: <code>gia_khuyen_mai</code>). Tuyệt đối không đổi key sau khi đã nhập nội dung nếu không muốn dữ liệu cũ bị ẩn.</li>
+                <li><strong>Escape dữ liệu:</strong> Luôn lọc dữ liệu trước khi xuất ra HTML: <code>esc_html()</code> cho chữ, <code>esc_url()</code> cho liên kết, <code>esc_attr()</code> cho thuộc tính thẻ.</li>
+                <li><strong>Không lồng Repeater:</strong> Bộ khung thuần được thiết kế tinh gọn để tối ưu tốc độ, do đó repeater chỉ chứa các sub-field đơn, không lồng repeater bên trong repeater.</li>
+            </ul>
+
+            <div class="page-nav">
+                <a href="single.html">← Tạo Template Single Post-type</a>
+                <a href="tra-cuu-field.html" class="next">Tra cứu kiểu field →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

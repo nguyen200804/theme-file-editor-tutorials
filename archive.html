@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tạo Template Archive - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Hướng dẫn tạo template lưu trữ danh sách (Archive) cho category, tag, custom taxonomy và custom post type trong WordPress.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html" class="active">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Tạo Template Archive (Trang danh sách)</h1>
+            <p class="lead">Template Archive dùng để hiển thị danh sách bài viết theo chuyên mục (Category), thẻ (Tag), tác giả (Author) hoặc danh sách của Custom Post Type (Sản phẩm, Dự án, Tin tức...).</p>
+
+            <h2>1. Các loại file Template Archive</h2>
+            <table>
+                <tr>
+                    <th>Loại danh sách</th>
+                    <th>Tên file (hoặc đặt trong <code>archive/</code>)</th>
+                    <th>Điều kiện &amp; Ghi chú</th>
+                </tr>
+                <tr>
+                    <td><strong>Archive chung</strong></td>
+                    <td><code>archive.php</code></td>
+                    <td>Dự phòng cuối cùng cho tất cả danh sách nếu không có file chuyên biệt.</td>
+                </tr>
+                <tr>
+                    <td><strong>Custom Post Type</strong></td>
+                    <td><code>archive-{post_type}.php</code><br>Ví dụ: <code>archive-san-pham.php</code></td>
+                    <td>Khi đăng ký post type trong <code>register_post_type()</code>, bắt buộc phải có thuộc tính <code>'has_archive' =&gt; true</code>.</td>
+                </tr>
+                <tr>
+                    <td><strong>Chuyên mục (Category)</strong></td>
+                    <td><code>category-{slug}.php</code><br><code>category.php</code></td>
+                    <td>Áp dụng cho danh mục bài viết mặc định.</td>
+                </tr>
+                <tr>
+                    <td><strong>Custom Taxonomy</strong></td>
+                    <td><code>taxonomy-{tax}-{term}.php</code><br><code>taxonomy-{tax}.php</code><br>Ví dụ: <code>taxonomy-loai-san-pham.php</code></td>
+                    <td>Áp dụng cho các nhóm phân loại tùy biến của Custom Post Type.</td>
+                </tr>
+                <tr>
+                    <td><strong>Thẻ (Tag) / Tác giả (Author)</strong></td>
+                    <td><code>tag.php</code>, <code>author.php</code>, <code>date.php</code></td>
+                    <td>Hiển thị bài viết theo tag, tác giả hoặc mốc thời gian.</td>
+                </tr>
+            </table>
+
+            <h2>2. Cấu trúc chuẩn của một file Archive</h2>
+            <p>Code mẫu file <code>archive-san-pham.php</code> (hoặc <code>archive/archive-san-pham.php</code> nếu dùng loader):</p>
+
+            <pre><code>&lt;?php
+/**
+ * Template Archive cho Custom Post Type "san-pham"
+ * Đường dẫn URL: domain.com/san-pham/
+ */
+
+get_header(); ?&gt;
+
+&lt;main id="primary" class="site-main archive-container container"&gt;
+
+    &lt;!-- 1. Tiêu đề và mô tả của Archive --&gt;
+    &lt;header class="archive-header"&gt;
+        &lt;h1 class="archive-title"&gt;
+            &lt;?php
+            if ( is_post_type_archive() ) {
+                post_type_archive_title();
+            } else {
+                the_archive_title();
+            }
+            ?&gt;
+        &lt;/h1&gt;
+        &lt;?php
+        // In mô tả của taxonomy / category nếu có
+        the_archive_description( '&lt;div class="archive-description lead"&gt;', '&lt;/div&gt;' );
+        ?&gt;
+    &lt;/header&gt;
+
+    &lt;!-- 2. Vòng lặp danh sách sản phẩm / bài viết --&gt;
+    &lt;?php if ( have_posts() ) : ?&gt;
+
+        &lt;div class="product-grid"&gt;
+            &lt;?php
+            while ( have_posts() ) :
+                the_post();
+                // Nạp card item tương ứng từ template-parts/loop/
+                get_template_part( 'template-parts/loop/card', get_post_type() );
+            endwhile;
+            ?&gt;
+        &lt;/div&gt;
+
+        &lt;!-- 3. Phân trang chuẩn WordPress --&gt;
+        &lt;nav class="pagination-wrap" aria-label="Phân trang"&gt;
+            &lt;?php
+            the_posts_pagination( array(
+                'mid_size'  =&gt; 2,
+                'prev_text' =&gt; '« Trang trước',
+                'next_text' =&gt; 'Trang sau »',
+            ) );
+            ?&gt;
+        &lt;/nav&gt;
+
+    &lt;?php else : ?&gt;
+
+        &lt;!-- Khi danh sách không có bài viết nào --&gt;
+        &lt;?php get_template_part( 'template-parts/loop/none' ); ?&gt;
+
+    &lt;?php endif; ?&gt;
+
+&lt;/main&gt;
+
+&lt;?php get_footer(); ?&gt;</code></pre>
+
+            <h2>3. Bóc tách Card Item trong <code>template-parts/loop/</code></h2>
+            <p>Để code gọn và tái sử dụng được ở nhiều trang khác (như trang chủ hay widget), ta tạo file <code>template-parts/loop/card-san-pham.php</code>:</p>
+            <pre><code>&lt;article id="post-&lt;?php the_ID(); ?&gt;" &lt;?php post_class( 'product-card' ); ?&gt;&gt;
+    &lt;a href="&lt;?php the_permalink(); ?&gt;" class="product-thumb"&gt;
+        &lt;?php if ( has_post_thumbnail() ) : ?&gt;
+            &lt;?php the_post_thumbnail( 'medium' ); ?&gt;
+        &lt;?php else : ?&gt;
+            &lt;img src="&lt;?php echo esc_url( get_template_directory_uri() . '/assets/images/no-thumb.png' ); ?&gt;" alt="&lt;?php the_title_attribute(); ?&gt;"&gt;
+        &lt;?php endif; ?&gt;
+    &lt;/a&gt;
+
+    &lt;div class="product-body"&gt;
+        &lt;h3 class="product-name"&gt;
+            &lt;a href="&lt;?php the_permalink(); ?&gt;"&gt;&lt;?php the_title(); ?&gt;&lt;/a&gt;
+        &lt;/h3&gt;
+        &lt;div class="product-price"&gt;
+            &lt;?php echo esc_html( number_format_i18n( ten_field( 'gia' ) ) ); ?&gt; đ
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/article&gt;</code></pre>
+
+            <h2>4. Cách chỉnh số bài và sắp xếp qua <code>pre_get_posts</code></h2>
+            <div class="note">
+                <strong>LƯU Ý CỰC KỲ QUAN TRỌNG:</strong><br>
+                Tuyệt đối <strong>không</strong> dùng <code>query_posts()</code> hoặc tạo <code>new WP_Query()</code> để ghi đè vòng lặp chính trong template archive. Việc đó sẽ làm hỏng phân trang (lỗi 404 trang 2, 3...) và khiến database phải truy vấn 2 lần.
+            </div>
+
+            <p>Cách chuẩn mực nhất là dùng hook <code>pre_get_posts</code> trong <code>functions.php</code>:</p>
+            <pre><code>// functions.php
+function ten_theme_customize_archive( $query ) {
+    // Chỉ can thiệp ở ngoài frontend và là truy vấn chính (Main Query)
+    if ( ! is_admin() && $query-&gt;is_main_query() ) {
+
+        // Tùy biến riêng cho archive sản phẩm và taxonomy loại sản phẩm
+        if ( is_post_type_archive( 'san-pham' ) || is_tax( 'loai-san-pham' ) ) {
+            $query-&gt;set( 'posts_per_page', 12 ); // 12 sản phẩm mỗi trang
+            $query-&gt;set( 'orderby', 'date' );
+            $query-&gt;set( 'order', 'DESC' );
+        }
+
+        // Tùy biến cho category tin tức
+        if ( is_category() ) {
+            $query-&gt;set( 'posts_per_page', 8 );
+        }
+    }
+}
+add_action( 'pre_get_posts', 'ten_theme_customize_archive' );</code></pre>
+
+            <h2>5. Bỏ tiền tố mặc định của <code>the_archive_title()</code></h2>
+            <p>Mặc định WordPress sẽ hiển thị các tiền tố như <em>"Chuyên mục: "</em>, <em>"Thẻ: "</em>, <em>"Lưu trữ: "</em>. Để xóa bỏ tiền tố này cho tiêu đề gọn gàng, thêm bộ lọc sau vào <code>functions.php</code>:</p>
+            <pre><code>add_filter( 'get_the_archive_title_prefix', '__return_empty_string' );</code></pre>
+
+            <div class="page-nav">
+                <a href="dang-ky-post-type.html">← Đăng ký Post Type, Taxonomy, Option</a>
+                <a href="single.html" class="next">Tạo Template Single Post-type →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

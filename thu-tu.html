@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thứ tự chọn template - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Thứ tự ưu tiên nạp template (Template Hierarchy) trong WordPress từ cụ thể đến chung.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html" class="active">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Thứ tự chọn template</h1>
+            <p class="lead">WordPress kiểm tra tập tin theo thứ tự từ cụ thể đến chung (Template Hierarchy), gặp file nào tồn tại thì dùng file đó và dừng lại.</p>
+
+            <table>
+                <tr>
+                    <th>Loại</th>
+                    <th>Thứ tự (cao → thấp)</th>
+                </tr>
+                <tr>
+                    <td>Trang tĩnh</td>
+                    <td>Template chọn tay → <code>page-{slug}</code> → <code>page-{id}</code> → <code>page</code> →
+                        <code>singular</code> → <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Trang chủ</td>
+                    <td><code>front-page</code> → (<code>home</code> hoặc <code>page</code>) → <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Bài viết</td>
+                    <td><code>single-post-{slug}</code> → <code>single-post</code> → <code>single</code> →
+                        <code>singular</code> → <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Custom post type</td>
+                    <td><code>single-{pt}-{slug}</code> → <code>single-{pt}</code> → <code>single</code> →
+                        <code>singular</code> → <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    <td><code>category-{slug}</code> → <code>category-{id}</code> → <code>category</code> →
+                        <code>archive</code> → <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Tag</td>
+                    <td><code>tag-{slug}</code> → <code>tag-{id}</code> → <code>tag</code> → <code>archive</code> →
+                        <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Custom taxonomy</td>
+                    <td><code>taxonomy-{tax}-{term}</code> → <code>taxonomy-{tax}</code> → <code>taxonomy</code> →
+                        <code>archive</code> → <code>index</code></td>
+                </tr>
+                <tr>
+                    <td>Archive post type</td>
+                    <td><code>archive-{pt}</code> → <code>archive</code> → <code>index</code> (cần
+                        <code>has_archive</code>)</td>
+                </tr>
+                <tr>
+                    <td>Tác giả</td>
+                    <td><code>author-{nicename}</code> → <code>author-{id}</code> → <code>author</code> →
+                        <code>archive</code> → <code>index</code></td>
+                </tr>
+            </table>
+
+            <p><code>singular.php</code> là lưới an toàn của cả <code>single.php</code> và <code>page.php</code>: nó chỉ
+                được dùng cho loại nội dung nào mà file chuyên biệt của nó không tồn tại. <code>front-page.php</code>
+                luôn được dùng cho trang chủ, bất kể cài đặt trong Settings → Reading.</p>
+
+            <div class="page-nav">
+                <a href="cau-truc.html">← Cấu trúc thư mục</a>
+                <a href="loader.html" class="next">Gom file vào folder →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tra cứu kiểu field - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Bảng tra cứu chi tiết các kiểu Custom Field: cú pháp khai báo, cách lấy dữ liệu và code mẫu xuất ra template.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html" class="active">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Tra cứu các kiểu Custom Field</h1>
+            <p class="lead">Bảng tra cứu nhanh cú pháp khai báo (Config) và code mẫu xuất dữ liệu (Template) cho từng kiểu trường trong bộ khung thay thế ACF.</p>
+
+            <!-- BẢNG TRA CỨU NHANH -->
+            <h2>Bảng tra cứu nhanh</h2>
+            <table>
+                <tr>
+                    <th>Kiểu (<code>type</code>)</th>
+                    <th>Mô tả</th>
+                    <th>Hàm lấy dữ liệu</th>
+                    <th>Hàm Escape an toàn</th>
+                </tr>
+                <tr>
+                    <td><a href="#f-text"><code>text</code></a></td>
+                    <td>Chuỗi văn bản ngắn 1 dòng</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>esc_html()</code> / <code>esc_attr()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-textarea"><code>textarea</code></a></td>
+                    <td>Văn bản nhiều dòng</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>nl2br( esc_html(...) )</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-number"><code>number</code></a></td>
+                    <td>Số nguyên hoặc số thập phân</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>number_format_i18n()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-email"><code>email</code></a></td>
+                    <td>Địa chỉ email chuẩn</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>esc_html()</code> / <code>antispambot()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-url"><code>url</code></a></td>
+                    <td>Đường dẫn liên kết</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>esc_url()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-select"><code>select</code></a></td>
+                    <td>Menu thả xuống chọn 1 giá trị</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>esc_html()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-radio"><code>radio</code></a></td>
+                    <td>Nút chọn 1 trong nhiều lựa chọn</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>esc_html()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-checkbox"><code>checkbox</code></a></td>
+                    <td>Hộp đánh dấu Bật/Tắt ('1' hoặc '0')</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td>Kiểm tra <code>if ('1' === ...)</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-image"><code>image</code></a></td>
+                    <td>Chọn 1 ảnh từ thư viện Media</td>
+                    <td><code>ten_image('key', 'size')</code></td>
+                    <td>Tự động in thẻ <code>&lt;img&gt;</code> chuẩn</td>
+                </tr>
+                <tr>
+                    <td><a href="#f-gallery"><code>gallery</code></a></td>
+                    <td>Chọn nhiều ảnh làm Album/Slider</td>
+                    <td><code>ten_gallery('key')</code></td>
+                    <td>Trả về mảng các Attachment ID</td>
+                </tr>
+                <tr>
+                    <td><a href="#f-color"><code>color</code></a></td>
+                    <td>Hộp chọn mã màu (#hex)</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>esc_attr()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-date"><code>date</code></a></td>
+                    <td>Bộ chọn ngày tháng (YYYY-MM-DD)</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>date_i18n()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-file"><code>file</code></a></td>
+                    <td>Tập tin đính kèm (PDF, DOCX, ZIP)</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>wp_get_attachment_url()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-wysiwyg"><code>wysiwyg</code></a></td>
+                    <td>Bộ soạn thảo văn bản chuẩn WordPress</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td><code>wp_kses_post()</code></td>
+                </tr>
+                <tr>
+                    <td><a href="#f-repeater"><code>repeater</code></a></td>
+                    <td>Danh sách lặp nhiều hàng (sub-fields)</td>
+                    <td><code>ten_field('key')</code></td>
+                    <td>Vòng lặp <code>foreach</code></td>
+                </tr>
+            </table>
+
+            <!-- CHI TIẾT TỪNG KIỂU -->
+            <h2 id="f-text">1. text (Văn bản ngắn)</h2>
+            <p>Dùng cho họ tên, chức danh, mã sản phẩm, tiêu đề phụ.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'ma_san_pham', 'label' =&gt; 'Mã sản phẩm (SKU)', 'type' =&gt; 'text' )
+
+// Sử dụng trong template:
+&lt;?php echo esc_html( ten_field( 'ma_san_pham' ) ); ?&gt;</code></pre>
+
+            <h2 id="f-textarea">2. textarea (Văn bản nhiều dòng)</h2>
+            <p>Dùng cho mô tả ngắn, địa chỉ, mã nhúng script, ghi chú.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'ghi_chu', 'label' =&gt; 'Ghi chú đơn hàng', 'type' =&gt; 'textarea' )
+
+// Sử dụng trong template (giữ xuống dòng):
+&lt;?php echo nl2br( esc_html( ten_field( 'ghi_chu' ) ) ); ?&gt;</code></pre>
+
+            <h2 id="f-number">3. number (Số)</h2>
+            <p>Dùng cho giá bán, diện tích, năm hoàn thành, số lượng.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'gia_ban', 'label' =&gt; 'Giá bán (VNĐ)', 'type' =&gt; 'number' )
+
+// Sử dụng trong template (định dạng dấu phẩy phân cách ngàn):
+&lt;?php echo esc_html( number_format_i18n( ten_field( 'gia_ban' ) ) ); ?&gt; đ</code></pre>
+
+            <h2 id="f-email">4. email (Địa chỉ thư điện tử)</h2>
+            <p>Dùng cho email liên hệ, email hỗ trợ kỹ thuật.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'email_lien_he', 'label' =&gt; 'Email hỗ trợ', 'type' =&gt; 'email' )
+
+// Sử dụng trong template:
+&lt;a href="mailto:&lt;?php echo esc_attr( ten_field( 'email_lien_he' ) ); ?&gt;"&gt;
+    &lt;?php echo esc_html( ten_field( 'email_lien_he' ) ); ?&gt;
+&lt;/a&gt;</code></pre>
+
+            <h2 id="f-url">5. url (Đường dẫn liên kết)</h2>
+            <p>Dùng cho link mạng xã hội, link landing page ngoài, link video youtube.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'link_video', 'label' =&gt; 'Link Youtube', 'type' =&gt; 'url' )
+
+// Sử dụng trong template:
+&lt;a href="&lt;?php echo esc_url( ten_field( 'link_video' ) ); ?&gt;" target="_blank" rel="noopener"&gt;Xem Video&lt;/a&gt;</code></pre>
+
+            <h2 id="f-select">6. select (Menu thả xuống)</h2>
+            <p>Dùng khi cần chọn 1 giá trị cố định từ danh sách có sẵn.</p>
+            <pre><code>// Khai báo:
+array(
+    'key'     =&gt; 'tinh_trang',
+    'label'   =&gt; 'Tình trạng hàng',
+    'type'    =&gt; 'select',
+    'options' =&gt; array(
+        'con_hang' =&gt; 'Còn hàng',
+        'het_hang' =&gt; 'Hết hàng',
+        'dat_truoc'=&gt; 'Đặt trước',
+    ),
+)
+
+// Sử dụng trong template:
+&lt;?php
+$status = ten_field( 'tinh_trang' );
+if ( 'con_hang' === $status ) {
+    echo '&lt;span class="badge in-stock"&gt;Còn hàng&lt;/span&gt;';
+}
+?&gt;</code></pre>
+
+            <h2 id="f-radio">7. radio (Nút chọn duy nhất)</h2>
+            <p>Tương tự select nhưng hiển thị toàn bộ lựa chọn ra màn hình để click nhanh.</p>
+            <pre><code>// Khai báo:
+array(
+    'key'     =&gt; 'bo_cuc',
+    'label'   =&gt; 'Kiểu bố cục banner',
+    'type'    =&gt; 'radio',
+    'options' =&gt; array(
+        'full'   =&gt; 'Toàn màn hình',
+        'box'    =&gt; 'Đóng khung gọn',
+    ),
+)</code></pre>
+
+            <h2 id="f-checkbox">8. checkbox (Hộp kiểm Bật / Tắt)</h2>
+            <p>Dùng cho các cờ nhị phân: "Nổi bật", "Ghim đầu trang", "Ẩn giá". Lưu giá trị <code>'1'</code> hoặc <code>'0'</code>.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'noi_bat', 'label' =&gt; 'Đánh dấu nổi bật', 'type' =&gt; 'checkbox' )
+
+// Sử dụng trong template:
+&lt;?php if ( '1' === ten_field( 'noi_bat' ) ) : ?&gt;
+    &lt;span class="badge hot"&gt;HOT&lt;/span&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h2 id="f-image">9. image (Ảnh đơn)</h2>
+            <p>Tích hợp cửa sổ Media Library của WordPress. Lưu trữ Attachment ID.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'anh_dai_dien', 'label' =&gt; 'Ảnh đại diện', 'type' =&gt; 'image' )
+
+// Cách 1: Xuất nhanh cả thẻ &lt;img&gt; chuẩn WordPress:
+&lt;?php echo ten_image( 'anh_dai_dien', 'large' ); ?&gt;
+
+// Cách 2: Lấy riêng URL của ảnh:
+&lt;?php
+$img_id = ten_field( 'anh_dai_dien' );
+$img_url = wp_get_attachment_image_url( $img_id, 'full' );
+?&gt;
+&lt;img src="&lt;?php echo esc_url( $img_url ); ?&gt;" alt="Ảnh"&gt;</code></pre>
+
+            <h2 id="f-gallery">10. gallery (Bộ sưu tập ảnh)</h2>
+            <p>Cho phép chọn nhiều ảnh cùng lúc, sắp xếp kéo thả. Lưu mảng các Attachment ID.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'album_anh', 'label' =&gt; 'Album ảnh dự án', 'type' =&gt; 'gallery' )
+
+// Sử dụng trong template:
+&lt;div class="slider-gallery"&gt;
+    &lt;?php
+    $gallery_ids = ten_gallery( 'album_anh' );
+    foreach ( (array) $gallery_ids as $id ) : ?&gt;
+        &lt;div class="slide-item"&gt;
+            &lt;?php echo wp_get_attachment_image( $id, 'large' ); ?&gt;
+        &lt;/div&gt;
+    &lt;?php endforeach; ?&gt;
+&lt;/div&gt;</code></pre>
+
+            <h2 id="f-color">11. color (Mã màu sắc)</h2>
+            <p>Mở bảng màu (Color Picker). Trả về chuỗi mã màu hex (ví dụ <code>#ff0000</code>).</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'mau_nen', 'label' =&gt; 'Màu nền khối', 'type' =&gt; 'color' )
+
+// Sử dụng trong template:
+&lt;div style="background-color: &lt;?php echo esc_attr( ten_field( 'mau_nen' ) ); ?&gt;;"&gt;...&lt;/div&gt;</code></pre>
+
+            <h2 id="f-date">12. date (Ngày tháng)</h2>
+            <p>Hộp chọn lịch ngày/tháng/năm theo định dạng chuẩn <code>YYYY-MM-DD</code>.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'ngay_khoi_chieu', 'label' =&gt; 'Ngày khởi chiếu', 'type' =&gt; 'date' )
+
+// Sử dụng trong template:
+&lt;?php
+$date_raw = ten_field( 'ngay_khoi_chieu' );
+if ( $date_raw ) {
+    echo esc_html( date_i18n( 'd/m/Y', strtotime( $date_raw ) ) );
+}
+?&gt;</code></pre>
+
+            <h2 id="f-file">13. file (Tập tin đính kèm)</h2>
+            <p>Upload tài liệu PDF, DOCX, ZIP qua Media Library. Lưu Attachment ID.</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'tai_lieu_dinh_kem', 'label' =&gt; 'Tài liệu hướng dẫn (PDF)', 'type' =&gt; 'file' )
+
+// Sử dụng trong template:
+&lt;?php
+$file_id  = ten_field( 'tai_lieu_dinh_kem' );
+$file_url = wp_get_attachment_url( $file_id );
+if ( $file_url ) : ?&gt;
+    &lt;a href="&lt;?php echo esc_url( $file_url ); ?&gt;" download&gt;Tải về tài liệu (.PDF)&lt;/a&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h2 id="f-wysiwyg">14. wysiwyg (Trình soạn thảo phong phú)</h2>
+            <p>Nhúng khung soạn thảo TinyMCE đầy đủ (đậm, nghiêng, chèn ảnh, căn lề).</p>
+            <pre><code>// Khai báo:
+array( 'key' =&gt; 'noi_dung_phu', 'label' =&gt; 'Nội dung mở rộng', 'type' =&gt; 'wysiwyg' )
+
+// Sử dụng trong template:
+&lt;div class="rich-content"&gt;
+    &lt;?php echo wp_kses_post( ten_field( 'noi_dung_phu' ) ); ?&gt;
+&lt;/div&gt;</code></pre>
+
+            <h2 id="f-repeater">15. repeater (Trường lặp danh sách)</h2>
+            <p>Cho phép bấm nút "Thêm hàng" để nhập vô số dòng dữ liệu có cấu trúc giống nhau.</p>
+            <pre><code>// Khai báo:
+array(
+    'key'        =&gt; 'bang_gia',
+    'label'      =&gt; 'Bảng giá dịch vụ',
+    'type'       =&gt; 'repeater',
+    'sub_fields' =&gt; array(
+        array( 'key' =&gt; 'ten_goi',  'label' =&gt; 'Tên gói dịch vụ', 'type' =&gt; 'text' ),
+        array( 'key' =&gt; 'muc_gia',  'label' =&gt; 'Mức giá',         'type' =&gt; 'number' ),
+        array( 'key' =&gt; 'mo_ta',    'label' =&gt; 'Mô tả ngắn',      'type' =&gt; 'text' ),
+    ),
+)
+
+// Sử dụng trong template:
+&lt;table&gt;
+    &lt;tr&gt;&lt;th&gt;Gói&lt;/th&gt;&lt;th&gt;Giá&lt;/th&gt;&lt;th&gt;Mô tả&lt;/th&gt;&lt;/tr&gt;
+    &lt;?php foreach ( (array) ten_field( 'bang_gia' ) as $row ) : ?&gt;
+        &lt;tr&gt;
+            &lt;td&gt;&lt;?php echo esc_html( $row['ten_goi'] ); ?&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;?php echo esc_html( number_format_i18n( $row['muc_gia'] ) ); ?&gt; đ&lt;/td&gt;
+            &lt;td&gt;&lt;?php echo esc_html( $row['mo_ta'] ); ?&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;?php endforeach; ?&gt;
+&lt;/table&gt;</code></pre>
+
+            <div class="page-nav">
+                <a href="fields.html">← Custom field thay ACF</a>
+                <a href="sua-loi.html" class="next">Xử lý sự cố →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tạo Template Single Post-type - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Hướng dẫn tạo template chi tiết (Single) cho bài viết và Custom Post Type trong WordPress: bố cục, liên kết taxonomy và bài viết liên quan.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html" class="active">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Tạo Template Single Post-type (Trang chi tiết)</h1>
+            <p class="lead">Template Single dùng để hiển thị chi tiết một bài viết duy nhất thuộc bài viết mặc định (<code>post</code>) hoặc một Custom Post Type bất kỳ (Sản phẩm, Dự án, Dịch vụ, Tuyển dụng...).</p>
+
+            <h2>1. Quy tắc đặt tên file Template Single</h2>
+            <table>
+                <tr>
+                    <th>Loại nội dung</th>
+                    <th>Tên file (hoặc đặt trong <code>single/</code>)</th>
+                    <th>Mức ưu tiên</th>
+                </tr>
+                <tr>
+                    <td><strong>Bài viết đơn theo slug</strong></td>
+                    <td><code>single-{post_type}-{slug}.php</code><br>Ví dụ: <code>single-post-gioi-thieu.php</code></td>
+                    <td>Cao nhất, áp dụng riêng cho 1 bài có slug chỉ định.</td>
+                </tr>
+                <tr>
+                    <td><strong>Custom Post Type</strong></td>
+                    <td><code>single-{post_type}.php</code><br>Ví dụ: <code>single-san-pham.php</code>, <code>single-du-an.php</code></td>
+                    <td>Áp dụng cho tất cả bài viết thuộc post type tương ứng.</td>
+                </tr>
+                <tr>
+                    <td><strong>Bài viết mặc định</strong></td>
+                    <td><code>single-post.php</code></td>
+                    <td>Chuyên dụng cho post type <code>post</code> (Tin tức / Blog).</td>
+                </tr>
+                <tr>
+                    <td><strong>Dự phòng chung</strong></td>
+                    <td><code>single.php</code> → <code>singular.php</code> → <code>index.php</code></td>
+                    <td>Nếu không có file cụ thể, WordPress sẽ dùng file dự phòng này.</td>
+                </tr>
+            </table>
+
+            <h2>2. Cấu trúc chuẩn file <code>single-{post_type}.php</code></h2>
+            <p>Code mẫu file <code>single-san-pham.php</code> (hoặc <code>single/single-san-pham.php</code> nếu dùng loader):</p>
+
+            <pre><code>&lt;?php
+/**
+ * Template chi tiết Sản phẩm (Custom Post Type: san-pham)
+ */
+
+get_header(); ?&gt;
+
+&lt;main id="primary" class="site-main single-san-pham-wrap container"&gt;
+
+    &lt;?php
+    while ( have_posts() ) :
+        the_post(); ?&gt;
+
+        &lt;!-- 1. Breadcrumb điều hướng --&gt;
+        &lt;nav class="breadcrumb" aria-label="Đường dẫn trang"&gt;
+            &lt;a href="&lt;?php echo esc_url( home_url( '/' ) ); ?&gt;"&gt;Trang chủ&lt;/a&gt; &amp;raquo;
+            &lt;a href="&lt;?php echo esc_url( get_post_type_archive_link( 'san-pham' ) ); ?&gt;"&gt;Sản phẩm&lt;/a&gt; &amp;raquo;
+            &lt;span&gt;&lt;?php the_title(); ?&gt;&lt;/span&gt;
+        &lt;/nav&gt;
+
+        &lt;article id="post-&lt;?php the_ID(); ?&gt;" &lt;?php post_class( 'single-product-detail' ); ?&gt;&gt;
+            &lt;div class="product-top-grid"&gt;
+                &lt;!-- Cột 1: Ảnh đại diện &amp; Gallery --&gt;
+                &lt;div class="product-gallery"&gt;
+                    &lt;?php if ( has_post_thumbnail() ) : ?&gt;
+                        &lt;div class="main-image"&gt;
+                            &lt;?php the_post_thumbnail( 'large' ); ?&gt;
+                        &lt;/div&gt;
+                    &lt;?php endif; ?&gt;
+                    &lt;?php echo ten_gallery( 'album_anh' ); ?&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Cột 2: Thông tin sản phẩm &amp; Đặt hàng --&gt;
+                &lt;div class="product-summary"&gt;
+                    &lt;h1 class="product-title"&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
+
+                    &lt;div class="product-price"&gt;
+                        &lt;?php if ( ten_field( 'gia' ) ) : ?&gt;
+                            &lt;span class="price"&gt;&lt;?php echo esc_html( number_format_i18n( ten_field( 'gia' ) ) ); ?&gt; đ&lt;/span&gt;
+                        &lt;?php else : ?&gt;
+                            &lt;span class="contact-price"&gt;Liên hệ để có giá tốt nhất&lt;/span&gt;
+                        &lt;?php endif; ?&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class="product-short-desc"&gt;
+                        &lt;?php the_excerpt(); ?&gt;
+                    &lt;/div&gt;
+
+                    &lt;a href="#dat-hang" class="btn btn-primary"&gt;Liên hệ đặt mua&lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- 2. Nội dung mô tả chi tiết --&gt;
+            &lt;section class="product-full-content"&gt;
+                &lt;h2&gt;Mô tả chi tiết sản phẩm&lt;/h2&gt;
+                &lt;div class="entry-content"&gt;
+                    &lt;?php the_content(); ?&gt;
+                &lt;/div&gt;
+            &lt;/section&gt;
+        &lt;/article&gt;
+
+        &lt;!-- 3. Khối sản phẩm / bài viết liên quan (Related Items) --&gt;
+        &lt;section class="related-posts"&gt;
+            &lt;h2&gt;Sản phẩm liên quan&lt;/h2&gt;
+            &lt;div class="product-grid"&gt;
+                &lt;?php
+                $terms = get_the_terms( get_the_ID(), 'loai-san-pham' );
+                $term_ids = ! empty( $terms ) &amp;&amp; ! is_wp_error( $terms ) ? wp_list_pluck( $terms, 'term_id' ) : array();
+
+                $related_args = array(
+                    'post_type'      =&gt; 'san-pham',
+                    'posts_per_page' =&gt; 4,
+                    'post__not_in'   =&gt; array( get_the_ID() ), // Loại trừ sản phẩm đang xem
+                    'orderby'        =&gt; 'rand',               // Lấy ngẫu nhiên
+                );
+
+                if ( ! empty( $term_ids ) ) {
+                    $related_args['tax_query'] = array(
+                        array(
+                            'taxonomy' =&gt; 'loai-san-pham',
+                            'field'    =&gt; 'term_id',
+                            'terms'    =&gt; $term_ids,
+                        ),
+                    );
+                }
+
+                $related_query = new WP_Query( $related_args );
+
+                if ( $related_query-&gt;have_posts() ) :
+                    while ( $related_query-&gt;have_posts() ) : $related_query-&gt;the_post();
+                        get_template_part( 'template-parts/loop/card', 'san-pham' );
+                    endwhile;
+                    wp_reset_postdata(); // Luôn reset postdata sau custom query
+                endif;
+                ?&gt;
+            &lt;/div&gt;
+        &lt;/section&gt;
+
+    &lt;?php
+    endwhile; // Kết thúc The Loop
+    ?&gt;
+
+&lt;/main&gt;
+
+&lt;?php get_footer(); ?&gt;</code></pre>
+
+            <h2>3. Bóc tách thân bài bằng <code>template-parts/content/</code></h2>
+            <p>Nếu bạn muốn file <code>single.php</code> hoặc <code>single-post.php</code> dùng chung cấu trúc khung và chỉ khác biệt phần hiển thị nội dung, hãy bóc tách ra các file nhỏ trong thư mục <code>template-parts/content/</code>:</p>
+            <pre><code>// Trong single.php
+while ( have_posts() ) : the_post();
+    get_template_part( 'template-parts/content/content', get_post_type() );
+endwhile;</code></pre>
+            <p>WordPress sẽ tự động tìm nạp:
+                <ul>
+                    <li><code>template-parts/content/content-san-pham.php</code> (nếu đang xem bài post type <code>san-pham</code>)</li>
+                    <li><code>template-parts/content/content-post.php</code> (nếu xem bài viết thường)</li>
+                    <li><code>template-parts/content/content.php</code> (dự phòng)</li>
+                </ul>
+            </p>
+
+            <h2>4. Các hàm tiện ích thường dùng trong trang Single</h2>
+            <table>
+                <tr>
+                    <th>Hàm WordPress</th>
+                    <th>Ý nghĩa &amp; Cách sử dụng</th>
+                </tr>
+                <tr>
+                    <td><code>the_title()</code></td>
+                    <td>In ra tiêu đề bài viết.</td>
+                </tr>
+                <tr>
+                    <td><code>the_content()</code></td>
+                    <td>In ra toàn bộ nội dung trong trình soạn thảo.</td>
+                </tr>
+                <tr>
+                    <td><code>the_post_thumbnail('size')</code></td>
+                    <td>In thẻ <code>&lt;img&gt;</code> ảnh đại diện theo kích thước chỉ định (<code>thumbnail</code>, <code>medium</code>, <code>large</code>, <code>full</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>get_post_type_archive_link('pt')</code></td>
+                    <td>Lấy đường dẫn URL tới trang danh sách (Archive) của post type đó.</td>
+                </tr>
+                <tr>
+                    <td><code>previous_post_link()</code><br><code>next_post_link()</code></td>
+                    <td>Tạo liên kết chuyển tiếp tới bài trước đó hoặc bài kế tiếp.</td>
+                </tr>
+                <tr>
+                    <td><code>comments_template()</code></td>
+                    <td>Nạp khung bình luận và đánh giá của WordPress.</td>
+                </tr>
+            </table>
+
+            <div class="page-nav">
+                <a href="archive.html">← Tạo Template Archive</a>
+                <a href="fields.html" class="next">Custom field thay ACF →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

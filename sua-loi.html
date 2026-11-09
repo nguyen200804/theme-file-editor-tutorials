@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Xử lý sự cố - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Các lỗi thường gặp và cách khắc phục khi làm việc với Theme File Editor trong WordPress.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <nav aria-label="Mục lục">
+            <b>Theme WordPress</b>
+            <a href="index.html">Bắt đầu</a>
+            <a href="cau-truc.html">Cấu trúc thư mục</a>
+            <a href="thu-tu.html">Thứ tự chọn template</a>
+            <a href="loader.html">Gom file vào folder</a>
+            <a href="template-parts.html">Template parts</a>
+            <a href="page-cung.html">Tạo Page cứng</a>
+            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
+            <a href="archive.html">Tạo Template Archive</a>
+            <a href="single.html">Tạo Template Single Post-type</a>
+            <a href="fields.html">Custom field thay ACF</a>
+            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
+            <a href="sua-loi.html" class="active">Xử lý sự cố</a>
+        </nav>
+        <main>
+            <h1>Xử lý sự cố</h1>
+            <p class="lead">Một số lỗi phổ biến khi tùy biến theme trong Theme File Editor và cách khắc phục nhanh chóng.</p>
+
+            <details open>
+                <summary>Template mới không chạy</summary>
+                <p>Kiểm tra tên file khớp key (không phải label), đã nạp <code>template-loader.php</code> chưa, rồi vào
+                    <strong>Settings → Permalinks → Save Changes</strong> để làm mới đường dẫn. Hãy xóa cache nếu site đang dùng plugin cache.</p>
+            </details>
+            <details>
+                <summary>Không biết trang đang dùng file nào</summary>
+                <p>Cài plugin <strong>Query Monitor</strong> và xem mục Template: nó liệt kê cả danh sách file ứng viên WordPress đã thử theo thứ tự ưu tiên.</p>
+            </details>
+            <details>
+                <summary>Page Template không xuất hiện trong danh sách chọn</summary>
+                <p>Kiểm tra comment <code>Template Name:</code> ở đầu file, đảm bảo file nằm trong thư mục gốc hoặc thư mục <code>templates/</code>. Nếu vẫn không thấy, thử đổi sang theme khác rồi kích hoạt lại để WordPress làm mới danh sách template.</p>
+            </details>
+            <details>
+                <summary>Site trắng (WSOD) sau khi sửa functions.php</summary>
+                <p>Lỗi cú pháp PHP. Bạn cần mở và sửa lại file qua FTP hoặc cPanel File Manager, hoặc khôi phục lại bản sao lưu trước đó.</p>
+            </details>
+
+            <div class="page-nav">
+                <a href="tra-cuu-field.html">← Tra cứu kiểu field</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+
