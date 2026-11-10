@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tạo Header, Footer và Gọi Menu - Hướng dẫn cấu hình theme WordPress</title>
+    <title>Tạo Header, Footer &amp; Quản lý Menu - Hướng dẫn cấu hình theme WordPress</title>
     <meta name="description"
-        content="Quy trình chuẩn xây dựng Header & Footer: các hook sống còn của WordPress, cách đăng ký vị trí menu trong functions.php, gán menu trong Admin và hiển thị ra giao diện.">
+        content="Hướng dẫn chi tiết từ A-Z: bản chất từng dòng code trong header.php, footer.php, các hook sống còn, cơ chế hoạt động của Menu và cách xử lý lỗi thường gặp.">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -16,117 +16,96 @@
             <a href="index.html">← Danh sách bài viết</a>
         </header>
         <main>
-            <h1>Hướng dẫn tạo Header, Footer và Đăng ký / Gọi Menu trong WordPress Theme</h1>
-            <p class="lead">Quy trình chuẩn xây dựng Header &amp; Footer: các hook sống còn của WordPress, cách đăng ký vị trí menu trong <code>functions.php</code>, gán menu trong Admin và hiển thị ra ngoài giao diện.</p>
+            <h1>Hướng dẫn chi tiết từ A-Z: Tạo Header, Footer và Quản lý Menu trong WordPress</h1>
+            <p class="lead">Tài liệu toàn diện giải thích bản chất từng dòng code trong <code>header.php</code>, <code>footer.php</code>, quy chế hoạt động của Menu WordPress và cách xử lý các lỗi thường gặp cho người mới bắt đầu.</p>
 
             <!-- PHẦN 1 -->
-            <h2>I. Các Hook bắt buộc phải có trong Header &amp; Footer</h2>
-            <p>Trong theme WordPress, có <strong>3 hàm hook sống còn</strong> bắt buộc phải xuất hiện. Nếu thiếu chúng, thanh công cụ Admin Bar sẽ biến mất, các plugin (SEO, Contact Form, Google Analytics) và file CSS/JS sẽ không thể tải được vào trang:</p>
+            <h2>I. Hiểu đúng bản chất của Header và Footer trong WordPress</h2>
+            <p>Một trang web hoàn chỉnh luôn bắt đầu bằng thẻ khai báo <code>&lt;!DOCTYPE html&gt;</code> và kết thúc bằng thẻ đóng <code>&lt;/html&gt;</code>. Trong kiến trúc theme WordPress, cấu trúc này được chia đôi làm 2 nửa độc lập kẹp lấy nội dung ở giữa:</p>
+            <ul>
+                <li><strong><code>header.php</code> (Nửa trên):</strong> Mở thẻ <code>&lt;html&gt;</code>, thẻ <code>&lt;head&gt;</code>, nạp mã CSS/SEO, mở thẻ <code>&lt;body&gt;</code>, chứa khối Logo và Thanh Menu điều hướng chính.</li>
+                <li><strong>Các file nội dung (Ở giữa):</strong> Như <code>front-page.php</code>, <code>page.php</code>, <code>single.php</code>, <code>archive.php</code>... chỉ chứa phần ruột <code>&lt;main&gt;</code> của riêng trang đó.</li>
+                <li><strong><code>footer.php</code> (Nửa dưới):</strong> Chứa nội dung chân trang, thông tin bản quyền, nạp mã JavaScript, và quan trọng nhất là đóng lại hai thẻ <code>&lt;/body&gt;</code> và <code>&lt;/html&gt;</code>.</li>
+            </ul>
+            <p>Nhờ cách chia module này, khi bạn muốn thay đổi Logo, thêm số Hotline hay chỉnh sửa Menu trên đầu trang, bạn chỉ cần sửa đúng <strong>1 file <code>header.php</code> duy nhất</strong> là toàn bộ hàng trăm trang trên website đều tự động cập nhật đồng bộ.</p>
+
+            <!-- PHẦN 2 -->
+            <h2>II. 3 "Hàm sống còn" bắt buộc phải có trong Header &amp; Footer</h2>
+            <p>Rất nhiều người mới lập trình theme gặp phải các lỗi khó hiểu như: <em>"Mất thanh Admin Bar màu đen trên cùng khi đã đăng nhập"</em> hoặc <em>"Cài plugin Contact Form 7, Yoast SEO nhưng không hoạt động"</em>. Nguyên nhân 100% là do thiếu 3 hàm hook cốt lõi sau:</p>
 
             <table>
                 <thead>
                     <tr>
                         <th>Hàm Hook</th>
                         <th>Vị trí đặt bắt buộc</th>
-                        <th>Ý nghĩa &amp; Vai trò</th>
+                        <th>Chức năng thực tế</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><code>&lt;?php wp_head(); ?&gt;</code></td>
-                        <td>Đặt ngay <strong>TRƯỚC</strong> thẻ đóng <code>&lt;/head&gt;</code> trong <code>header.php</code>.</td>
-                        <td>Nạp toàn bộ CSS, font chữ, thẻ meta SEO, favicon và mã script phần đầu trang của theme và plugin.</td>
+                        <td><code>wp_head();</code></td>
+                        <td>Đặt ngay <strong>TRƯỚC</strong> thẻ đóng <code>&lt;/head&gt;</code> trong <code>header.php</code></td>
+                        <td>Là nơi WordPress và các plugin tự động bơm mã CSS, mã thẻ meta SEO, Favicon và mã Google Analytics vào đầu trang.</td>
                     </tr>
                     <tr>
-                        <td><code>&lt;?php wp_body_open(); ?&gt;</code></td>
-                        <td>Đặt ngay <strong>SAU</strong> thẻ mở <code>&lt;body&gt;</code> trong <code>header.php</code>.</td>
-                        <td>Kích hoạt hook chuẩn cho các mã theo dõi như Google Tag Manager (GTM), pixel chèn mã noscript.</td>
+                        <td><code>wp_body_open();</code></td>
+                        <td>Đặt ngay <strong>SAU</strong> thẻ mở <code>&lt;body&gt;</code> trong <code>header.php</code></td>
+                        <td>Dành cho các mã theo dõi cần kích hoạt ngay khi mở thẻ body (như mã Google Tag Manager dạng noscript).</td>
                     </tr>
                     <tr>
-                        <td><code>&lt;?php wp_footer(); ?&gt;</code></td>
-                        <td>Đặt ngay <strong>TRƯỚC</strong> thẻ đóng <code>&lt;/body&gt;</code> trong <code>footer.php</code>.</td>
-                        <td>Nạp toàn bộ file JavaScript (JS), thanh công cụ Admin Bar phía trên cùng và các modal/popup.</td>
+                        <td><code>wp_footer();</code></td>
+                        <td>Đặt ngay <strong>TRƯỚC</strong> thẻ đóng <code>&lt;/body&gt;</code> trong <code>footer.php</code></td>
+                        <td>Là nơi nạp toàn bộ các file JavaScript (.js), thư viện jQuery, mã popup và thanh công cụ quản trị (Admin Bar).</td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="note">
-                <strong>⚠️ Cảnh báo thường gặp:</strong> Khi bạn thấy website bị vỡ giao diện (mất CSS), mất thanh đen Admin Bar khi đã đăng nhập, hoặc bấm nút gửi form không có phản hồi — 99% nguyên nhân là do quên gọi <code>wp_head()</code> hoặc <code>wp_footer()</code>!
-            </div>
-
-            <!-- PHẦN 2 -->
-            <h2>II. Quy trình 3 bước Đăng ký &amp; Gọi Menu</h2>
-
-            <h3>Bước 1: Đăng ký vị trí Menu trong functions.php</h3>
-            <p>Mở file <code>functions.php</code>, sử dụng hàm <code>register_nav_menus()</code> móc vào action hook <code>after_setup_theme</code>:</p>
-            <pre><code>function theme_setup_menus() {
-    register_nav_menus( array(
-        'primary-menu' =&gt; 'Menu Chính (Header)',
-        'footer-menu'  =&gt; 'Menu Chân Trang (Footer)',
-        'mobile-menu'  =&gt; 'Menu Di Động (Mobile Drawer)',
-    ) );
-}
-add_action( 'after_setup_theme', 'theme_setup_menus' );</code></pre>
-
-            <h3>Bước 2: Tạo Menu và Gán vị trí trong WordPress Admin</h3>
-            <ol>
-                <li>Truy cập vào <strong>Giao diện (Appearance) &rarr; Trình đơn (Menus)</strong>.</li>
-                <li>Đặt tên menu (VD: <em>"Menu Đầu Trang"</em>) và bấm <strong>Tạo trình đơn (Create Menu)</strong>.</li>
-                <li>Chọn các trang (Trang chủ, Giới thiệu, Sản phẩm, Liên hệ...) ở cột bên trái và bấm <strong>Thêm vào trình đơn</strong>.</li>
-                <li>Ở phần <strong>Cài đặt trình đơn &rarr; Vị trí hiển thị (Display location)</strong>: Tích chọn vào <strong>"Menu Chính (Header)"</strong>.</li>
-                <li>Bấm <strong>Lưu trình đơn (Save Menu)</strong>.</li>
-            </ol>
-
-            <h3>Bước 3: Hiển thị Menu ra giao diện bằng wp_nav_menu()</h3>
-            <p>Đặt đoạn code sau vào vị trí bạn muốn menu xuất hiện (trong <code>header.php</code> hoặc <code>footer.php</code>):</p>
-            <pre><code>&lt;nav class="main-nav" aria-label="Menu chính"&gt;
-    &lt;?php
-    wp_nav_menu( array(
-        'theme_location' =&gt; 'primary-menu', // Khóa vị trí đã đăng ký ở Bước 1
-        'container'      =&gt; false,          // Bỏ thẻ div bọc ngoài mặc định
-        'menu_class'     =&gt; 'nav-list',      // Thêm class CSS cho thẻ &lt;ul&gt;
-        'fallback_cb'    =&gt; false,          // Không in ra gì nếu Admin chưa gán menu
-    ) );
-    ?&gt;
-&lt;/nav&gt;</code></pre>
-
             <!-- PHẦN 3 -->
-            <h2>III. Cấu trúc chuẩn của file header.php</h2>
-            <p>Một file <code>header.php</code> hoàn chỉnh, hỗ trợ Logo tùy biến từ Admin (Custom Logo) và Menu chính điều hướng:</p>
+            <h2>III. Chi tiết từng dòng code trong file header.php chuẩn</h2>
+            <p>Dưới đây là mã nguồn <code>header.php</code> hoàn chỉnh kèm giải thích chi tiết ý nghĩa từng dòng code:</p>
 
             <pre><code>&lt;!DOCTYPE html&gt;
+&lt;!-- 1. language_attributes(): Tự động in ngôn ngữ của trang (ví dụ lang="vi" hoặc lang="en-US") --&gt;
 &lt;html &lt;?php language_attributes(); ?&gt;&gt;
 &lt;head&gt;
+    &lt;!-- 2. bloginfo('charset'): Tự động in bảng mã UTF-8 chống lỗi font tiếng Việt --&gt;
     &lt;meta charset="&lt;?php bloginfo( 'charset' ); ?&gt;"&gt;
     &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
-    &lt;?php wp_head(); // BẮT BUỘC: Nạp CSS và mã nguồn header ?&gt;
+    
+    &lt;!-- 3. Hàm sống còn của Header (BẮT BUỘC) --&gt;
+    &lt;?php wp_head(); ?&gt;
 &lt;/head&gt;
 
+&lt;!-- 4. body_class(): Tự động in các class CSS nhận diện trang (VD: home, logged-in, page-id-10...) --&gt;
 &lt;body &lt;?php body_class(); ?&gt;&gt;
-&lt;?php wp_body_open(); // BẮT BUỘC: Hỗ trợ mã theo dõi (GTM, Analytics) ?&gt;
+&lt;?php wp_body_open(); ?&gt;
 
 &lt;header class="site-header"&gt;
     &lt;div class="container header-inner"&gt;
         
-        &lt;!-- Logo hoặc Tên website --&gt;
+        &lt;!-- KHỐI LOGO WEBSITE --&gt;
         &lt;div class="site-branding"&gt;
-            &lt;?php if ( has_custom_logo() ) : ?&gt;
-                &lt;?php the_custom_logo(); ?&gt;
-            &lt;?php else : ?&gt;
+            &lt;?php
+            // Nếu khách hàng đã tải logo lên trong Giao diện -&gt; Tùy biến thì in ảnh Logo:
+            if ( has_custom_logo() ) :
+                the_custom_logo();
+            else :
+                // Nếu chưa có logo, in tên website dạng chữ kèm link về trang chủ:
+                ?&gt;
                 &lt;a class="site-title" href="&lt;?php echo esc_url( home_url( '/' ) ); ?&gt;"&gt;
                     &lt;?php bloginfo( 'name' ); ?&gt;
                 &lt;/a&gt;
             &lt;?php endif; ?&gt;
         &lt;/div&gt;
 
-        &lt;!-- Menu điều hướng chính --&gt;
+        &lt;!-- KHỐI MENU CHÍNH --&gt;
         &lt;nav class="main-navigation" aria-label="Menu chính"&gt;
             &lt;?php
             wp_nav_menu( array(
-                'theme_location' =&gt; 'primary-menu',
-                'container'      =&gt; false,
-                'menu_class'     =&gt; 'menu-main',
-                'fallback_cb'    =&gt; false,
+                'theme_location' =&gt; 'primary-menu', // Gắn với vị trí đã đăng ký
+                'container'      =&gt; false,          // Bỏ thẻ &lt;div&gt; thừa bọc ngoài
+                'menu_class'     =&gt; 'menu-list',     // Gán class CSS cho thẻ &lt;ul&gt;
+                'fallback_cb'    =&gt; false,          // Không in bừa bãi khi chưa tạo menu
             ) );
             ?&gt;
         &lt;/nav&gt;
@@ -135,107 +114,157 @@ add_action( 'after_setup_theme', 'theme_setup_menus' );</code></pre>
 &lt;/header&gt;</code></pre>
 
             <!-- PHẦN 4 -->
-            <h2>IV. Cấu trúc chuẩn của file footer.php</h2>
-            <p>File <code>footer.php</code> chứa phần chân trang, menu phụ (chính sách, điều khoản), bản quyền tự động cập nhật năm hiện tại và đóng các thẻ HTML:</p>
+            <h2>IV. Chi tiết từng dòng code trong file footer.php chuẩn</h2>
+            <p>Dưới đây là mã nguồn <code>footer.php</code> hoàn chỉnh, đóng kín các thẻ mở từ đầu trang:</p>
 
             <pre><code>&lt;footer class="site-footer"&gt;
     &lt;div class="container footer-inner"&gt;
         
-        &lt;!-- Menu chân trang (Chính sách, Điều khoản...) --&gt;
+        &lt;!-- MENU PHỤ CHÂN TRANG (Chính sách, Điều khoản...) --&gt;
         &lt;nav class="footer-navigation" aria-label="Menu chân trang"&gt;
             &lt;?php
             wp_nav_menu( array(
                 'theme_location' =&gt; 'footer-menu',
                 'container'      =&gt; false,
-                'menu_class'     =&gt; 'menu-footer',
-                'depth'          =&gt; 1, // Chỉ hiện 1 cấp cha (không xổ submenu)
+                'menu_class'     =&gt; 'footer-links',
+                'depth'          =&gt; 1, // Chỉ lấy cấp cha, không xổ menu con
                 'fallback_cb'    =&gt; false,
             ) );
             ?&gt;
         &lt;/nav&gt;
 
-        &lt;!-- Dòng bản quyền tự cập nhật năm hiện tại --&gt;
+        &lt;!-- BẢN QUYỀN TỰ ĐỘNG CẬP NHẬT NĂM HIỆN TẠI --&gt;
         &lt;div class="site-copyright"&gt;
-            &lt;p&gt;&amp;copy; &lt;?php echo esc_html( date( 'Y' ) ); ?&gt; &lt;?php bloginfo( 'name' ); ?&gt;. All rights reserved.&lt;/p&gt;
+            &lt;p&gt;
+                &amp;copy; &lt;?php echo esc_html( date( 'Y' ) ); ?&gt; 
+                &lt;?php bloginfo( 'name' ); ?&gt;. Bảo lưu mọi quyền.
+            &lt;/p&gt;
         &lt;/div&gt;
 
     &lt;/div&gt;
 &lt;/footer&gt;
 
-&lt;?php wp_footer(); // BẮT BUỘC: Nạp JS và thanh công cụ Admin Bar ?&gt;
+&lt;!-- 5. Hàm sống còn của Footer: Nạp Javascript và Admin Bar (BẮT BUỘC) --&gt;
+&lt;?php wp_footer(); ?&gt;
+
+&lt;!-- Đóng lại các thẻ mở từ header.php --&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
             <!-- PHẦN 5 -->
-            <h2>V. Cách gọi Header và Footer trong các Template</h2>
-            <p>Trong mọi file template như <code>page.php</code>, <code>single.php</code>, <code>index.php</code>, bạn luôn kẹp nội dung ở giữa hai hàm sau:</p>
+            <h2>V. Cơ chế hoạt động của Menu trong WordPress (Hình dung đơn giản)</h2>
+            <p>Để hiểu cách Menu vận hành một cách trực quan, bạn hãy tưởng tượng mô hình thực tế sau:</p>
+            <ul>
+                <li><strong><code>theme_location</code> (Vị trí menu):</strong> Giống như <em>"Chiếc móc treo áo cố định trên tường"</em> do lập trình viên đóng sẵn trong mã code.</li>
+                <li><strong>Menu trong Admin:</strong> Giống như <em>"Chiếc áo"</em> do khách hàng tự may (tự gom các liên kết Trang chủ, Giới thiệu, Sản phẩm...).</li>
+                <li><strong>Hành động gán (Display location):</strong> Là hành động lấy "Chiếc áo" móc vào "Chiếc móc treo" tương ứng.</li>
+            </ul>
 
-            <pre><code>&lt;?php get_header(); // Tự động nạp file header.php ?&gt;
+            <h3>Quy trình thực hiện 3 bước rõ ràng:</h3>
 
-&lt;main class="site-main container"&gt;
-    &lt;!-- Nội dung trang web nằm ở đây --&gt;
-&lt;/main&gt;
+            <h4>Bước 1: Tạo móc treo trong code (functions.php)</h4>
+            <p>Mở file <code>functions.php</code> và khai báo các vị trí bạn muốn đặt menu trên website:</p>
+            <pre><code>function theme_setup_menus() {
+    register_nav_menus( array(
+        'primary-menu' =&gt; 'Menu Chính Đầu Trang',
+        'footer-menu'  =&gt; 'Menu Chân Trang',
+        'mobile-menu'  =&gt; 'Menu Trên Điện Thoại',
+    ) );
+}
+add_action( 'after_setup_theme', 'theme_setup_menus' );</code></pre>
 
-&lt;?php get_footer(); // Tự động nạp file footer.php ?&gt;</code></pre>
-
-            <h3>Mẹo nâng cao: Dùng Header / Footer biến thể cho Landing Page</h3>
-            <p>Nếu bạn muốn trang Landing Page chạy quảng cáo có Header tối giản (không logo, không menu điều hướng để tránh khách thoát trang):</p>
+            <h4>Bước 2: Tạo chiếc áo và móc vào trong Admin</h4>
             <ol>
-                <li>Tạo file mới tên là <code>header-landing.php</code> đặt tại thư mục theme.</li>
-                <li>Trong file template của trang Landing Page, thay vì gọi <code>get_header()</code> mặc định, bạn gọi:
-                    <pre><code>&lt;?php get_header( 'landing' ); ?&gt;</code></pre>
-                </li>
-                <li>WordPress sẽ tự động nạp file <code>header-landing.php</code> thay thế. Tương tự, bạn cũng có thể dùng <code>&lt;?php get_footer( 'landing' ); ?&gt;</code> để nạp <code>footer-landing.php</code>.</li>
+                <li>Đăng nhập WordPress Admin &rarr; vào mục <strong>Giao diện (Appearance) &rarr; Trình đơn (Menus)</strong>.</li>
+                <li>Nhập tên menu (Ví dụ: <em>Menu Header</em>) rồi bấm <strong>Tạo trình đơn</strong>.</li>
+                <li>Cột bên trái: Tích chọn các trang (Trang chủ, Tin tức, Giới thiệu...) rồi bấm <strong>Thêm vào trình đơn</strong>.</li>
+                <li>Kéo thả sắp xếp thứ tự hoặc kéo thụt vào trong để tạo menu đa cấp (Dropdown con).</li>
+                <li><strong>BƯỚC QUAN TRỌNG NHẤT:</strong> Ở mục <em>Cài đặt trình đơn &rarr; Vị trí hiển thị (Display location)</em>, tích chọn vào <strong>"Menu Chính Đầu Trang"</strong>.</li>
+                <li>Bấm <strong>Lưu trình đơn</strong>.</li>
             </ol>
 
+            <h4>Bước 3: Hiển thị ra màn hình bằng wp_nav_menu()</h4>
+            <p>Trong <code>header.php</code>, bạn gọi đúng khóa <code>'theme_location' =&gt; 'primary-menu'</code> để hiển thị chiếc áo đã móc vào:</p>
+            <pre><code>&lt;?php
+wp_nav_menu( array(
+    'theme_location' =&gt; 'primary-menu',
+    'container'      =&gt; false,
+    'menu_class'     =&gt; 'my-nav-bar',
+    'fallback_cb'    =&gt; false,
+) );
+?&gt;</code></pre>
+
             <!-- PHẦN 6 -->
-            <h2>VI. Bảng tra cứu các tham số quan trọng trong wp_nav_menu()</h2>
+            <h2>VI. Giải thích chi tiết các tham số của hàm wp_nav_menu()</h2>
+            <p>Khi dùng hàm <code>wp_nav_menu( array(...) )</code>, đây là ý nghĩa thực tế của các tùy chọn bạn thường gặp nhất:</p>
+
             <table>
                 <thead>
                     <tr>
-                        <th>Tham số (Key)</th>
+                        <th>Tham số</th>
                         <th>Giá trị khuyên dùng</th>
-                        <th>Ý nghĩa &amp; Cách sử dụng</th>
+                        <th>Tại sao lại dùng như vậy?</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><code>theme_location</code></td>
                         <td><code>'primary-menu'</code></td>
-                        <td>Tên vị trí định danh menu đã đăng ký trong <code>register_nav_menus()</code>.</td>
+                        <td>Bắt buộc phải khớp chính xác với khóa vị trí đã đăng ký trong <code>functions.php</code>.</td>
                     </tr>
                     <tr>
                         <td><code>container</code></td>
                         <td><code>false</code></td>
-                        <td>Thẻ bọc ngoài thẻ <code>&lt;ul&gt;</code>. Mặc định là <code>'div'</code>, nên để <code>false</code> để code HTML gọn gàng.</td>
-                    </tr>
-                    <tr>
-                        <td><code>container_class</code></td>
-                        <td><code>'menu-wrap'</code></td>
-                        <td>Class CSS gắn cho thẻ bọc ngoài nếu <code>container</code> khác <code>false</code>.</td>
+                        <td>Mặc định WordPress sẽ tự sinh một thẻ <code>&lt;div class="menu-container"&gt;</code> bọc ngoài thẻ <code>&lt;ul&gt;</code>. Đặt <code>false</code> để bỏ thẻ div thừa này, giúp code HTML sạch đẹp và chuẩn CSS hơn.</td>
                     </tr>
                     <tr>
                         <td><code>menu_class</code></td>
-                        <td><code>'nav-menu flex'</code></td>
-                        <td>Class CSS gắn trực tiếp vào thẻ <code>&lt;ul&gt;</code> của danh sách menu.</td>
+                        <td><code>'nav-menu'</code></td>
+                        <td>Tên class CSS gán trực tiếp vào thẻ <code>&lt;ul&gt;</code> để bạn dễ viết CSS Flexbox hoặc Grid.</td>
                     </tr>
                     <tr>
                         <td><code>fallback_cb</code></td>
                         <td><code>false</code></td>
-                        <td>Hàm dự phòng chạy khi Admin chưa tạo menu. Đặt <code>false</code> để không tự in danh sách trang linh tinh.</td>
+                        <td>Nếu người quản trị chưa vào Admin tạo menu, mặc định WordPress sẽ tự động in ra toàn bộ tất cả các trang làm vỡ giao diện web. Đặt <code>false</code> sẽ ẩn đi cho đến khi menu được tạo.</td>
                     </tr>
                     <tr>
                         <td><code>depth</code></td>
                         <td><code>0</code> hoặc <code>1</code></td>
-                        <td>Độ sâu cấp độ menu (<code>0</code>: cho phép menu đa cấp không giới hạn; <code>1</code>: chỉ lấy cấp 1 cha).</td>
-                    </tr>
-                    <tr>
-                        <td><code>echo</code></td>
-                        <td><code>true</code></td>
-                        <td><code>true</code>: In thẳng ra màn hình; <code>false</code>: Trả về chuỗi HTML để gán biến.</td>
+                        <td><code>0</code>: Cho phép hiển thị menu con không giới hạn cấp độ (phù hợp menu header có dropdown).<br><code>1</code>: Chỉ hiển thị menu cấp 1 cha (rất phù hợp cho menu footer).</td>
                     </tr>
                 </tbody>
             </table>
+
+            <!-- PHẦN 7 -->
+            <h2>VII. 3 Lỗi phổ biến nhất của người mới và cách xử lý</h2>
+
+            <h3>1. Lỗi: Mất thanh Admin Bar màu đen khi xem ngoài trang chủ</h3>
+            <p><strong>Nguyên nhân:</strong> Quên gọi hàm <code>&lt;?php wp_footer(); ?&gt;</code> ở cuối file <code>footer.php</code>.</p>
+            <p><strong>Cách sửa:</strong> Luôn kiểm tra xem ngay trước thẻ đóng <code>&lt;/body&gt;</code> đã có <code>&lt;?php wp_footer(); ?&gt;</code> chưa.</p>
+
+            <h3>2. Lỗi: Menu tự động hiển thị hàng loạt trang lung tung làm vỡ web</h3>
+            <p><strong>Nguyên nhân:</strong> Trong code chưa thêm tham số <code>'fallback_cb' =&gt; false</code>, hoặc trong Admin bạn đã tạo menu nhưng <strong>quên chưa tích chọn vị trí hiển thị (Display location)</strong>.</p>
+            <p><strong>Cách sửa:</strong> Vào <em>Giao diện &rarr; Menu</em>, kéo xuống dưới cùng mục <em>Vị trí hiển thị</em> và tích chọn đúng tên menu đã tạo.</p>
+
+            <h3>3. Lỗi: Logo không đổi được trong Customize (Tùy biến)</h3>
+            <p><strong>Nguyên nhân:</strong> Theme chưa khai báo tính năng hỗ trợ logo tùy biến <code>custom-logo</code> trong <code>functions.php</code>.</p>
+            <p><strong>Cách sửa:</strong> Kiểm tra trong hàm <code>theme_setup</code> (hook <code>after_setup_theme</code>) của <code>functions.php</code> xem đã có đoạn mã này chưa:</p>
+            <pre><code>add_theme_support( 'custom-logo', array(
+    'height'      =&gt; 80,
+    'width'       =&gt; 240,
+    'flex-height' =&gt; true,
+    'flex-width'  =&gt; true,
+) );</code></pre>
+
+            <div class="note">
+                <strong>💡 Mẹo nâng cao: Dùng Header / Footer biến thể cho Landing Page:</strong><br>
+                Khi muốn tạo trang Landing Page chạy quảng cáo không có Logo và không có Menu điều hướng (tránh khách thoát trang):
+                <ol style="margin-top: 6px; margin-bottom: 0;">
+                    <li>Tạo file <code>header-landing.php</code> với giao diện tối giản.</li>
+                    <li>Trong template trang gọi: <code>&lt;?php get_header( 'landing' ); ?&gt;</code>.</li>
+                    <li>WordPress sẽ tự động nạp <code>header-landing.php</code> thay thế cho <code>header.php</code>. Tương tự, gọi <code>get_footer( 'landing' )</code> để nạp <code>footer-landing.php</code>.</li>
+                </ol>
+            </div>
 
             <div class="page-nav">
                 <a href="template-parts.html">← Template parts</a>
@@ -247,4 +276,3 @@ add_action( 'after_setup_theme', 'theme_setup_menus' );</code></pre>
 </body>
 
 </html>
-
