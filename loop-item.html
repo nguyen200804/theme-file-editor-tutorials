@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tạo Loop Item - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Hướng dẫn tạo Loop Item (Card hiển thị) cho bài viết, custom post type và custom taxonomy trong WordPress theme.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+                <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
+        <main>
+            <h1>Tạo Loop Item (Thẻ hiển thị bài viết &amp; Taxonomy)</h1>
+            <p class="lead"><strong>Loop Item</strong> (thường gọi là Card / Thẻ item) là mảnh giao diện đại diện cho <strong>1 bài viết</strong> hoặc <strong>1 danh mục</strong> trong danh sách. Được lưu trong thư mục <code>template-parts/loop/</code> để tái sử dụng ở bất kỳ trang nào.</p>
+
+            <pre class="tree"><code>template-parts/loop/
+├── card.php             <span class="c"># Thẻ bài viết tin tức (post) mặc định</span>
+├── card-du-an.php       <span class="c"># Thẻ riêng cho Post Type "du-an"</span>
+├── card-san-pham.php    <span class="c"># Thẻ riêng cho Post Type "san-pham"</span>
+├── term-card.php        <span class="c"># Thẻ hiển thị một danh mục (Category / Taxonomy)</span>
+└── none.php             <span class="c"># Khối thông báo khi danh sách trống</span></code></pre>
+
+            <!-- PHẦN 1: LOOP ITEM CHO POST / POST-TYPE -->
+            <h2>1. Loop Item cho Bài viết &amp; Custom Post Type</h2>
+            <p>Mỗi thẻ bài viết nên bọc trong thẻ <code>&lt;article&gt;</code> cùng hàm <code>post_class()</code> để WordPress tự sinh các class CSS phục vụ tùy biến giao diện.</p>
+
+            <h3>Code mẫu: <code>template-parts/loop/card-du-an.php</code></h3>
+            <pre><code>&lt;!-- template-parts/loop/card-du-an.php --&gt;
+&lt;article id="post-&lt;?php the_ID(); ?&gt;" &lt;?php post_class( 'project-card' ); ?&gt;&gt;
+
+    &lt;!-- 1. Ảnh đại diện kèm link --&gt;
+    &lt;a href="&lt;?php the_permalink(); ?&gt;" class="project-thumb"&gt;
+        &lt;?php if ( has_post_thumbnail() ) : ?&gt;
+            &lt;?php the_post_thumbnail( 'medium', array( 'alt' =&gt; the_title_attribute( 'echo=0' ) ) ); ?&gt;
+        &lt;?php else : ?&gt;
+            &lt;img src="&lt;?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder.jpg' ) ); ?&gt;" alt="No image"&gt;
+        &lt;?php endif; ?&gt;
+
+        &lt;!-- Badge hiển thị danh mục / loại dự án --&gt;
+        &lt;?php
+        $terms = get_the_terms( get_the_ID(), 'loai-du-an' );
+        if ( ! empty( $terms ) &amp;&amp; ! is_wp_error( $terms ) ) : ?&gt;
+            &lt;span class="project-badge"&gt;&lt;?php echo esc_html( $terms[0]-&gt;name ); ?&gt;&lt;/span&gt;
+        &lt;?php endif; ?&gt;
+    &lt;/a&gt;
+
+    &lt;!-- 2. Nội dung thông tin thẻ --&gt;
+    &lt;div class="project-body"&gt;
+        &lt;h3 class="project-title"&gt;
+            &lt;a href="&lt;?php the_permalink(); ?&gt;"&gt;&lt;?php the_title(); ?&gt;&lt;/a&gt;
+        &lt;/h3&gt;
+
+        &lt;!-- Custom field thông tin thêm (ACF / Code thuần) --&gt;
+        &lt;div class="project-meta"&gt;
+            &lt;?php if ( ten_field( 'dia_diem' ) ) : ?&gt;
+                &lt;span class="location"&gt;📍 &lt;?php echo esc_html( ten_field( 'dia_diem' ) ); ?&gt;&lt;/span&gt;
+            &lt;?php endif; ?&gt;
+
+            &lt;?php if ( ten_field( 'nam_hoan_thanh' ) ) : ?&gt;
+                &lt;span class="year"&gt;🗓 &lt;?php echo esc_html( ten_field( 'nam_hoan_thanh' ) ); ?&gt;&lt;/span&gt;
+            &lt;?php endif; ?&gt;
+        &lt;/div&gt;
+
+        &lt;div class="project-excerpt"&gt;
+            &lt;?php the_excerpt(); ?&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;/article&gt;</code></pre>
+
+            <!-- PHẦN 2: LOOP ITEM CHO TAXONOMY -->
+            <h2>2. Loop Item cho Taxonomy (Hiển thị thẻ Danh mục)</h2>
+            <p>Khi bạn cần in ra danh sách các <strong>Danh mục / Loại sản phẩm / Chuyên mục</strong> nổi bật (ví dụ: lưới các danh mục trên Trang chủ), mỗi danh mục sẽ là 1 Term Card.</p>
+
+            <h3>Code mẫu: <code>template-parts/loop/term-card.php</code></h3>
+            <pre><code>&lt;!-- template-parts/loop/term-card.php --&gt;
+&lt;?php
+// Dữ liệu Term được truyền qua mảng $args trong get_template_part
+$term = $args['term'] ?? null;
+if ( ! $term ) return;
+
+$term_link = get_term_link( $term );
+$banner_id = ten_term_field( $term-&gt;term_id, 'anh_banner' );
+?&gt;
+
+&lt;div class="term-card"&gt;
+    &lt;a href="&lt;?php echo esc_url( $term_link ); ?&gt;" class="term-thumb"&gt;
+        &lt;?php if ( $banner_id ) : ?&gt;
+            &lt;?php echo wp_get_attachment_image( $banner_id, 'medium' ); ?&gt;
+        &lt;?php else : ?&gt;
+            &lt;img src="&lt;?php echo esc_url( get_theme_file_uri( 'assets/images/default-cat.jpg' ) ); ?&gt;" alt="Category"&gt;
+        &lt;?php endif; ?&gt;
+    &lt;/a&gt;
+
+    &lt;div class="term-info"&gt;
+        &lt;h3 class="term-name"&gt;
+            &lt;a href="&lt;?php echo esc_url( $term_link ); ?&gt;"&gt;&lt;?php echo esc_html( $term-&gt;name ); ?&gt;&lt;/a&gt;
+        &lt;/h3&gt;
+        &lt;span class="term-count"&gt;&lt;?php echo esc_html( $term-&gt;count ); ?&gt; bài viết&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            <!-- PHẦN 3: FILE DỰ PHÒNG KHI DANH SÁCH RỖNG -->
+            <h2>3. Khối thông báo danh sách trống (none.php)</h2>
+            <p>Khi chuyên mục hoặc kết quả tìm kiếm không có bài viết nào, hãy nạp file này:</p>
+            <pre><code>&lt;!-- template-parts/loop/none.php --&gt;
+&lt;div class="no-results text-center"&gt;
+    &lt;h3&gt;Không tìm thấy nội dung&lt;/h3&gt;
+    &lt;p class="lead"&gt;Hiện tại chưa có bài viết nào trong mục này. Vui lòng quay lại sau!&lt;/p&gt;
+    &lt;a href="&lt;?php echo esc_url( home_url( '/' ) ); ?&gt;" class="btn btn-primary"&gt;Về Trang chủ&lt;/a&gt;
+&lt;/div&gt;</code></pre>
+
+            <!-- PHẦN 4: CÁCH GỌI TRONG CÁC TRƯỜNG HỢP -->
+            <h2>4. Cách gọi Loop Item trong các Template</h2>
+
+            <h3>Trường hợp 1: Gọi trong trang Danh sách chính (Archive / Taxonomy)</h3>
+            <p>Tự động nhận diện Post Type hiện tại để nạp đúng file (VD: ở trang archive dự án sẽ tự nạp <code>card-du-an.php</code>):</p>
+            <pre><code>&lt;?php if ( have_posts() ) : ?&gt;
+    &lt;div class="grid-layout"&gt;
+        &lt;?php
+        while ( have_posts() ) : the_post();
+            // Tự động tìm card-{post_type}.php, nếu không có sẽ nạp card.php
+            get_template_part( 'template-parts/loop/card', get_post_type() );
+        endwhile;
+        ?&gt;
+    &lt;/div&gt;
+    &lt;?php the_posts_pagination(); ?&gt;
+&lt;?php else : ?&gt;
+    &lt;?php get_template_part( 'template-parts/loop/none' ); ?&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h3>Trường hợp 2: Gọi trong truy vấn phụ WP_Query (Trang chủ / Widget)</h3>
+            <pre><code>&lt;?php
+$project_query = new WP_Query( array(
+    'post_type'      =&gt; 'du-an',
+    'posts_per_page' =&gt; 6,
+) );
+
+if ( $project_query-&gt;have_posts() ) : ?&gt;
+    &lt;div class="project-grid"&gt;
+        &lt;?php
+        while ( $project_query-&gt;have_posts() ) : $project_query-&gt;the_post();
+            get_template_part( 'template-parts/loop/card', 'du-an' );
+        endwhile;
+        wp_reset_postdata(); // Luôn reset sau truy vấn phụ
+        ?&gt;
+    &lt;/div&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h3>Trường hợp 3: Xuất danh sách Danh mục / Phân loại (Taxonomy Terms)</h3>
+            <pre><code>&lt;?php
+// Lấy danh sách các Loại dự án có chứa bài viết
+$terms = get_terms( array(
+    'taxonomy'   =&gt; 'loai-du-an',
+    'hide_empty' =&gt; true,
+) );
+
+if ( ! empty( $terms ) &amp;&amp; ! is_wp_error( $terms ) ) : ?&gt;
+    &lt;div class="category-grid"&gt;
+        &lt;?php foreach ( $terms as $term ) : ?&gt;
+            &lt;?php
+            // Truyền đối tượng $term sang cho file template-parts/loop/term-card.php
+            get_template_part( 'template-parts/loop/term-card', null, array( 'term' =&gt; $term ) );
+            ?&gt;
+        &lt;?php endforeach; ?&gt;
+    &lt;/div&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <div class="page-nav">
+                <a href="dang-ky-post-type.html">← Đăng ký Post Type, Taxonomy, Option</a>
+                <a href="archive.html" class="next">Tạo Template Archive →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+
+
+

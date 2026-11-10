@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Custom UI Pagination - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description"
+        content="Cách tùy biến giao diện phân trang chuẩn WordPress: bóc tách component trong template-parts/ui/, cấu hình tham số và hỗ trợ cả Main Query lẫn WP_Query.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
+        <main>
+            <h1>Hướng dẫn Custom UI Pagination (Phân trang) trong WordPress</h1>
+            <p class="lead">Cách tùy biến giao diện phân trang chuẩn WordPress: bóc tách component trong <code>template-parts/ui/</code>, cấu hình tham số và hỗ trợ mượt mà cho cả Main Query lẫn WP_Query độc lập.</p>
+
+            <!-- PHẦN 1 -->
+            <h2>I. Cấu trúc HTML mặc định do WordPress sinh ra</h2>
+            <p>Khi bạn gọi hàm <code>the_posts_pagination()</code>, WordPress sẽ tự động xuất ra khối HTML chuẩn với cấu trúc sau:</p>
+
+            <pre><code>&lt;nav class="navigation pagination" aria-label="Bài viết"&gt;
+    &lt;h2 class="screen-reader-text"&gt;Điều hướng bài viết&lt;/h2&gt;
+    &lt;div class="nav-links"&gt;
+        &lt;a class="prev page-numbers" href="/page/1/"&gt;« Trước&lt;/a&gt;
+        &lt;a class="page-numbers" href="/page/1/"&gt;1&lt;/a&gt;
+        &lt;span aria-current="page" class="page-numbers current"&gt;2&lt;/span&gt;
+        &lt;a class="page-numbers" href="/page/3/"&gt;3&lt;/a&gt;
+        &lt;span class="page-numbers dots"&gt;…&lt;/span&gt;
+        &lt;a class="page-numbers" href="/page/10/"&gt;10&lt;/a&gt;
+        &lt;a class="next page-numbers" href="/page/3/"&gt;Sau »&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+
+            <h3>Bảng ý nghĩa các class CSS:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class CSS</th>
+                        <th>Ý nghĩa &amp; Vai trò</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.navigation.pagination</code></td>
+                        <td>Thẻ <code>&lt;nav&gt;</code> bọc ngoài cùng của toàn bộ thanh phân trang.</td>
+                    </tr>
+                    <tr>
+                        <td><code>.screen-reader-text</code></td>
+                        <td>Tiêu đề ẩn dành riêng cho thiết bị trợ thính (Accessibility).</td>
+                    </tr>
+                    <tr>
+                        <td><code>.nav-links</code></td>
+                        <td>Khung chứa toàn bộ danh sách các nút bấm số trang.</td>
+                    </tr>
+                    <tr>
+                        <td><code>.page-numbers</code></td>
+                        <td>Class chung cho tất cả các nút (cả số trang, nút Trước/Sau, dấu 3 chấm).</td>
+                    </tr>
+                    <tr>
+                        <td><code>.page-numbers.current</code></td>
+                        <td>Trang <strong>HIỆN TẠI</strong> đang xem (dạng thẻ <code>&lt;span&gt;</code>, không bấm được).</td>
+                    </tr>
+                    <tr>
+                        <td><code>.page-numbers.dots</code></td>
+                        <td>Dấu ba chấm (<code>…</code>) khi danh sách trang quá dài.</td>
+                    </tr>
+                    <tr>
+                        <td><code>.prev / .next</code></td>
+                        <td>Nút chuyển về trang trước hoặc sang trang tiếp theo.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- PHẦN 2 -->
+            <h2>II. Bảng tham số tùy biến của the_posts_pagination()</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tham số (Key)</th>
+                        <th>Mặc định</th>
+                        <th>Mô tả chức năng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>mid_size</code></td>
+                        <td><code>2</code></td>
+                        <td>Số lượng số trang hiển thị ở 2 bên trang hiện tại.</td>
+                    </tr>
+                    <tr>
+                        <td><code>prev_text</code></td>
+                        <td><code>« Trước</code></td>
+                        <td>Chữ hoặc icon hiển thị cho nút trang trước (VD: <code>&amp;larr; Trước</code> hoặc <code>‹</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>next_text</code></td>
+                        <td><code>Sau »</code></td>
+                        <td>Chữ hoặc icon hiển thị cho nút trang sau (VD: <code>Sau &amp;rarr;</code> hoặc <code>›</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>screen_reader_text</code></td>
+                        <td><code>Posts navigation</code></td>
+                        <td>Đặt thành một khoảng trắng <code>' '</code> để ẩn chữ tiêu đề mặc định.</td>
+                    </tr>
+                    <tr>
+                        <td><code>class</code></td>
+                        <td><code>pagination</code></td>
+                        <td>Class bổ sung thêm vào thẻ <code>&lt;nav&gt;</code> ngoài cùng.</td>
+                    </tr>
+                    <tr>
+                        <td><code>total</code></td>
+                        <td>Tự động theo query</td>
+                        <td>Tổng số trang (dùng khi truyền số trang của custom <code>WP_Query</code>).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- PHẦN 3 -->
+            <h2>III. Đóng gói Component: template-parts/ui/pagination.php</h2>
+            <p>Bóc tách phân trang thành một component độc lập để tái sử dụng ở mọi trang trong theme (Archive, Category, Taxonomy, Search, Custom Query...):</p>
+
+            <pre><code>&lt;?php
+/**
+ * Component: Phân trang (Pagination)
+ * File: template-parts/ui/pagination.php
+ */
+
+// Thiết lập giá trị mặc định và hòa trộn tham số truyền vào
+$args = wp_parse_args( $args, array(
+    'total'     =&gt; null,
+    'mid_size'  =&gt; 2,
+    'prev_text' =&gt; '&amp;larr; Trước',
+    'next_text' =&gt; 'Sau &amp;rarr;',
+    'class'     =&gt; 'custom-pagination',
+) );
+
+$pagination_args = array(
+    'mid_size'           =&gt; (int) $args['mid_size'],
+    'prev_text'          =&gt; $args['prev_text'],
+    'next_text'          =&gt; $args['next_text'],
+    'screen_reader_text' =&gt; ' ', // Bỏ chữ điều hướng mặc định
+    'class'              =&gt; $args['class'],
+);
+
+if ( ! empty( $args['total'] ) ) {
+    $pagination_args['total'] = (int) $args['total'];
+}
+
+the_posts_pagination( $pagination_args );
+?&gt;</code></pre>
+
+            <!-- PHẦN 4 -->
+            <h2>IV. Cách gọi component ra Template</h2>
+
+            <h3>1. Trong trang danh mục mặc định (Archive / Category / Taxonomy / Search)</h3>
+            <p>Dùng với Main Query, WordPress tự biết tổng số trang và trang hiện tại, bạn không cần truyền tham số gì thêm:</p>
+            <pre><code>&lt;?php if ( have_posts() ) : ?&gt;
+    &lt;div class="posts-grid"&gt;
+        &lt;?php while ( have_posts() ) : the_post(); ?&gt;
+            &lt;?php get_template_part( 'template-parts/loop/card', get_post_type() ); ?&gt;
+        &lt;?php endwhile; ?&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Gọi component phân trang --&gt;
+    &lt;?php get_template_part( 'template-parts/ui/pagination' ); ?&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h3>2. Trong câu truy vấn độc lập (Custom WP_Query)</h3>
+            <p>Bắt buộc phải lấy biến <code>$paged</code> và truyền tổng số trang <code>max_num_pages</code> vào component:</p>
+            <pre><code>&lt;?php
+$paged = get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1;
+
+$custom_query = new WP_Query( array(
+    'post_type'      =&gt; 'du-an',
+    'posts_per_page' =&gt; 6,
+    'paged'          =&gt; $paged,
+) );
+
+if ( $custom_query-&gt;have_posts() ) : ?&gt;
+    &lt;div class="projects-grid"&gt;
+        &lt;?php while ( $custom_query-&gt;have_posts() ) : $custom_query-&gt;the_post(); ?&gt;
+            &lt;?php get_template_part( 'template-parts/loop/card', 'du-an' ); ?&gt;
+        &lt;?php endwhile; ?&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Truyền max_num_pages vào component pagination --&gt;
+    &lt;?php 
+    get_template_part( 'template-parts/ui/pagination', null, array(
+        'total' =&gt; $custom_query-&gt;max_num_pages,
+    ) ); 
+    ?&gt;
+
+    &lt;?php wp_reset_postdata(); // Luôn reset sau loop phụ! ?&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <!-- PHẦN 5 -->
+            <h2>V. Code mẫu CSS hoàn chỉnh cho giao diện phân trang</h2>
+            <p>Dưới đây là bộ CSS chuẩn đẹp, căn giữa, bo góc hiện đại và hỗ trợ hover/active tương thích cho cả Light &amp; Dark mode:</p>
+
+            <pre><code>/* 1. Bao bọc căn giữa thanh phân trang */
+.custom-pagination {
+    margin: 40px 0 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 2. Khung chứa các nút bấm */
+.custom-pagination .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* 3. Style chung cho các ô số trang và nút trước/sau */
+.custom-pagination .page-numbers {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 6px;
+    border: 1px solid var(--line, #d8dee6);
+    background: var(--panel, #ffffff);
+    color: var(--ink, #1b2430);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+/* 4. Hiệu ứng Hover khi rê chuột */
+.custom-pagination .page-numbers:hover {
+    border-color: var(--accent, #0b5cad);
+    color: var(--accent, #0b5cad);
+    transform: translateY(-1px);
+}
+
+/* 5. Trang hiện tại (Active) */
+.custom-pagination .page-numbers.current {
+    background: var(--accent, #0b5cad);
+    border-color: var(--accent, #0b5cad);
+    color: #ffffff;
+    font-weight: 700;
+    cursor: default;
+    transform: none;
+}
+
+/* 6. Dấu ba chấm (...) */
+.custom-pagination .page-numbers.dots {
+    border: none;
+    background: transparent;
+    color: var(--mute, #5b6675);
+    cursor: default;
+    min-width: 24px;
+    padding: 0;
+}</code></pre>
+
+            <!-- PHẦN 6 -->
+            <h2>VI. Lưu ý quan trọng tránh lỗi phân trang</h2>
+            <div class="note">
+                <strong>⚠️ Lỗi bấm sang trang 2, 3 bị 404:</strong><br>
+                Thường xảy ra khi bạn dùng <code>query_posts()</code> hoặc tạo một <code>WP_Query</code> mới ghi đè lên template archive.
+                <ul style="margin: 6px 0 0; padding-left: 20px;">
+                    <li><strong>Giải pháp chuẩn mực:</strong> Luôn dùng hook <code>pre_get_posts</code> trong <code>functions.php</code> để điều chỉnh số bài mỗi trang (<code>posts_per_page</code>) thay vì can thiệp trực tiếp vào file template.</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>⚠️ Biến $paged ở Trang Chủ tĩnh (Static Front Page):</strong><br>
+                Nếu bạn cấu hình một Page làm Trang Chủ (trong <em>Cài đặt → Đọc</em>) và viết phân trang cho <code>WP_Query</code> tại đây, WordPress sử dụng query var <code>page</code> thay vì <code>paged</code>:
+                <pre><code>$paged = get_query_var( 'page' ) ? get_query_var( 'page' ) : 1;</code></pre>
+                Nếu dùng <code>get_query_var('paged')</code> ở Trang Chủ tĩnh, biến sẽ luôn trả về <code>0</code> khiến bạn bấm sang trang 2 mà nội dung vẫn giữ nguyên trang 1!
+            </div>
+
+            <div class="page-nav">
+                <a href="archive.html">← Tạo Template Archive</a>
+                <a href="single.html" class="next">Tạo Template Single Post-type →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+

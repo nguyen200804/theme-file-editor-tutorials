@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -11,21 +11,9 @@
 
 <body>
     <div class="wrap">
-        <nav aria-label="Mục lục">
-            <b>Theme WordPress</b>
-            <a href="index.html">Bắt đầu</a>
-            <a href="cau-truc.html">Cấu trúc thư mục</a>
-            <a href="thu-tu.html">Thứ tự chọn template</a>
-            <a href="loader.html">Gom file vào folder</a>
-            <a href="template-parts.html">Template parts</a>
-            <a href="page-cung.html">Tạo Page cứng</a>
-            <a href="dang-ky-post-type.html" class="active">Đăng ký Post Type, Taxonomy, Option</a>
-            <a href="archive.html">Tạo Template Archive</a>
-            <a href="single.html">Tạo Template Single Post-type</a>
-            <a href="fields.html">Custom field thay ACF</a>
-            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
-            <a href="sua-loi.html">Xử lý sự cố</a>
-        </nav>
+                <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
         <main>
             <h1>Đăng ký Post Type, Taxonomy và Option Page</h1>
             <p class="lead">Cách mở rộng cấu trúc dữ liệu cho WordPress: tạo các loại bài viết mới (Dự án, Sản phẩm), các nhóm phân loại tùy biến và trang cấu hình chung toàn site bằng mã nguồn PHP gốc.</p>
@@ -237,8 +225,8 @@ function ten_get_option( $key, $default = '' ) {
 &lt;p&gt;&amp;copy; &lt;?php echo esc_html( ten_get_option( 'footer_copy' ) ); ?&gt;&lt;/p&gt;</code></pre>
 
             <div class="page-nav">
-                <a href="page-cung.html">← Tạo Page cứng</a>
-                <a href="archive.html" class="next">Tạo Template Archive →</a>
+                <a href="the-loop.html">← Khi nào dùng The Loop</a>
+                <a href="loop-item.html" class="next">Tạo Loop Item →</a>
             </div>
         </main>
     </div>
@@ -246,4 +234,6 @@ function ten_get_option( $key, $default = '' ) {
 </body>
 
 </html>
+
+
 

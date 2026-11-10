@@ -1,58 +1,45 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tạo Page cứng - Hướng dẫn cấu hình theme WordPress</title>
-    <meta name="description" content="Cơ chế hoạt động và hướng dẫn chi tiết cách tạo Page cứng trong WordPress theme: Page Template, Slug Template, Front Page.">
+    <title>Tạo Page cứng (Page Template) - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description"
+        content="Hướng dẫn chi tiết từ cơ chế nạp template, 3 phương pháp tạo trang, khung code mẫu chuẩn đến tích hợp Custom Fields, auto-enqueue CSS/JS và xử lý sự cố.">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="wrap">
-        <nav aria-label="Mục lục">
-            <b>Theme WordPress</b>
-            <a href="index.html">Bắt đầu</a>
-            <a href="cau-truc.html">Cấu trúc thư mục</a>
-            <a href="thu-tu.html">Thứ tự chọn template</a>
-            <a href="loader.html">Gom file vào folder</a>
-            <a href="template-parts.html">Template parts</a>
-            <a href="page-cung.html" class="active">Tạo Page cứng</a>
-            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
-            <a href="archive.html">Tạo Template Archive</a>
-            <a href="single.html">Tạo Template Single Post-type</a>
-            <a href="fields.html">Custom field thay ACF</a>
-            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
-            <a href="sua-loi.html">Xử lý sự cố</a>
-        </nav>
+                <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
         <main>
-            <h1>Tạo Page cứng</h1>
-            <p class="lead">Tài liệu kỹ thuật: Cơ chế nạp template trang tĩnh của WordPress và hướng dẫn chi tiết cách tạo trang theo từng phương pháp.</p>
+            <h1>Tạo Page cứng (Page Template)</h1>
+            <p class="lead">Tài liệu hướng dẫn chi tiết từ cơ chế nạp template, các phương pháp tạo trang, khung code chuẩn (boilerplate) đến tích hợp Custom Fields và tự động nạp CSS/JS riêng theo từng trang.</p>
 
             <!-- PHẦN 1: CƠ CHẾ -->
-            <h2>I. Cơ chế hoạt động của WordPress với Page</h2>
-
-            <h3>1. Thứ tự tìm kiếm file template (Template Hierarchy)</h3>
-            <p>Khi có yêu cầu truy cập vào một trang tĩnh (post type: <code>page</code>), WordPress sẽ quét file theo thứ tự ưu tiên từ trên xuống dưới và dừng lại ngay khi gặp file đầu tiên tồn tại:</p>
+            <h2>I. Cơ chế hoạt động của WordPress khi tải một Page</h2>
+            <p>Khi người dùng truy cập vào một trang tĩnh (URL dạng: <code>domain.com/ten-trang/</code>), nhờ bộ nạp template (như <code>inc/template-loader.php</code> hoặc quy chuẩn WordPress), hệ thống sẽ quét file theo thứ tự ưu tiên từ trên xuống dưới và dừng lại ngay khi tìm thấy file đầu tiên tồn tại:</p>
 
             <pre class="tree"><code>1. Template được chọn tay trong Admin (templates/*.php)  [Ưu tiên cao nhất]
    ↓ (nếu trang để "Giao diện mặc định")
-2. page-{slug}.php  (Tìm theo slug URL, ví dụ: page-gioi-thieu.php)
+2. page/page-{slug}.php  (Tìm theo slug URL, ví dụ: page-gioi-thieu.php)
    ↓ (nếu không có)
-3. page-{id}.php    (Tìm theo ID bài viết, ví dụ: page-42.php)
+3. page/page-{id}.php    (Tìm theo ID bài viết, ví dụ: page-42.php)
    ↓ (nếu không có)
-4. page.php         (Template trang tĩnh dùng chung)
+4. page/page.php         (Template trang tĩnh dùng chung)
    ↓ (nếu không có)
-5. singular.php     (Dự phòng chung cho cả post và page)
+5. singular.php          (Dự phòng chung cho bài viết và trang tĩnh)
    ↓ (nếu không có)
-6. index.php        [Lưới an toàn cuối cùng của theme]</code></pre>
+6. index.php             [Lưới an toàn cuối cùng của theme]</code></pre>
 
             <div class="note">
-                <strong>Ngoại lệ cho Trang chủ:</strong> Nếu trang được cấu hình làm Trang chủ tĩnh trong <em>Settings → Reading</em>, WordPress luôn ưu tiên nạp file <code>front-page.php</code> trước tất cả các file trên.
+                <strong>📌 Lưu ý cho Trang Chủ:</strong> Nếu trang được cấu hình làm Trang chủ tĩnh trong <em>Cài đặt → Đọc</em> (Settings → Reading), WordPress luôn ưu tiên nạp file <code>page/front-page.php</code> (hoặc <code>front-page.php</code>) trước tất cả các file trên.
             </div>
 
-            <h3>2. So sánh cơ chế giữa Page Template và Slug Template</h3>
+            <h3>So sánh cơ chế giữa Page Template và Slug Template</h3>
             <table>
                 <tr>
                     <th>Tiêu chí</th>
@@ -61,76 +48,72 @@
                 </tr>
                 <tr>
                     <td><strong>Cơ chế nhận diện</strong></td>
-                    <td>Quét comment <code>Template Name:</code> ở đầu file và đọc giá trị meta <code>_wp_page_template</code> trong database.</td>
+                    <td>Quét comment <code>Template Name:</code> ở đầu file và đọc trường meta <code>_wp_page_template</code> trong Database.</td>
                     <td>Khớp trực tiếp tên file với chuỗi <code>slug</code> (đường dẫn URL) của trang.</td>
                 </tr>
                 <tr>
                     <td><strong>Vị trí lưu file</strong></td>
                     <td>Thư mục con <code>templates/</code> hoặc thư mục gốc theme.</td>
-                    <td>Thư mục gốc theme (hoặc thư mục <code>page/</code> nếu dùng loader).</td>
+                    <td>Thư mục <code>page/</code> (nếu dùng loader) hoặc thư mục gốc theme.</td>
                 </tr>
                 <tr>
-                    <td><strong>Ảnh hưởng khi đổi URL</strong></td>
+                    <td><strong>Đổi đường dẫn URL</strong></td>
                     <td><strong>Không ảnh hưởng:</strong> Đổi slug URL thì template vẫn giữ nguyên.</td>
-                    <td><strong>Mất giao diện:</strong> Đổi slug URL là mất template, rơi về <code>page.php</code>.</td>
+                    <td><strong>Mất giao diện:</strong> Đổi slug URL là mất liên kết, tự rơi về <code>page.php</code>.</td>
                 </tr>
                 <tr>
                     <td><strong>Khả năng tái sử dụng</strong></td>
-                    <td>Một template có thể gán cho nhiều trang khác nhau.</td>
-                    <td>Chỉ áp dụng cho đúng 1 trang có slug đó.</td>
+                    <td>Một template có thể gán cho nhiều trang khác nhau (ví dụ: Landing Page A, B).</td>
+                    <td>Chỉ áp dụng cho duy nhất 1 trang có đúng slug đó.</td>
                 </tr>
             </table>
 
-            <!-- PHẦN 2: HƯỚNG DẪN CÁCH TẠO -->
-            <h2>II. Hướng dẫn cách tạo chi tiết</h2>
+            <!-- PHẦN 2: 3 PHƯƠNG PHÁP -->
+            <h2>II. 3 Phương pháp tạo Page phổ biến</h2>
 
-            <!-- CÁCH 1 -->
-            <h3>Cách 1: Tạo bằng Page Template trong thư mục templates/ (Khuyên dùng)</h3>
+            <h3>Cách 1: Tạo tự động theo Slug URL (Khuyên dùng cho trang cố định)</h3>
+            <p>Áp dụng cho các trang có đường dẫn cố định và đặc thù như: Giới thiệu, Liên hệ, Chính sách bảo mật...</p>
             <ol>
-                <li>Tạo file mới trong thư mục <code>templates/</code> (ví dụ: <code>templates/page-gioi-thieu.php</code>).</li>
-                <li>Thêm comment khai báo tên template ở dòng đầu file:
+                <li>Vào <strong>Admin → Trang (Pages)</strong>, xem <strong>Đường dẫn (Slug)</strong> của trang (Ví dụ: slug là <code>lien-he</code>).</li>
+                <li>Mở thư mục <code>page/</code> trong theme và tạo file: <code>page/page-lien-he.php</code> (hoặc <code>page-lien-he.php</code> ở thư mục gốc theme).</li>
+                <li>Viết code cho file. WordPress sẽ tự động gọi file này mỗi khi truy cập <code>domain.com/lien-he/</code> mà không cần thao tác gán giao diện trong Admin.</li>
+            </ol>
+
+            <h3>Cách 2: Tạo Custom Template chọn tay trong Admin</h3>
+            <p>Áp dụng cho các giao diện cần tái sử dụng linh hoạt: Trang Landing Page sự kiện, Trang tràn viền (Fullwidth), Trang có thanh bên (Sidebar)...</p>
+            <ol>
+                <li>Vào thư mục <code>templates/</code>, tạo file mới (ví dụ: <code>templates/template-landing.php</code>).</li>
+                <li>Khai báo dòng comment bắt buộc ở đầu file:
                     <pre><code>&lt;?php
-/*
- * Template Name: Trang Giới thiệu
+/**
+ * Template Name: Giao Diện Landing Page Đặc Biệt
+ * Template Post Type: page
  */
 get_header(); ?&gt;</code></pre>
                 </li>
-                <li>Vào <strong>WP Admin → Pages → Thêm trang mới</strong> (hoặc sửa trang có sẵn).</li>
-                <li>Tại cột bên phải, tìm mục <strong>Page Attributes (Thuộc tính trang) → Template (Giao diện)</strong>, chọn <strong>"Trang Giới thiệu"</strong>.</li>
-                <li>Nhấn <strong>Publish (Đăng)</strong> hoặc <strong>Update (Cập nhật)</strong>.</li>
+                <li>Vào <strong>Admin → Trang → Sửa trang</strong>. Tại cột bên phải mục <strong>Thuộc tính trang (Page Attributes) → Giao diện (Template)</strong>, chọn <strong>"Giao Diện Landing Page Đặc Biệt"</strong> và nhấn <strong>Cập nhật</strong>.</li>
             </ol>
 
-            <!-- CÁCH 2 -->
-            <h3>Cách 2: Tạo tự động theo Slug (page-{slug}.php)</h3>
+            <h3>Cách 3: Tạo Trang Chủ (Front Page)</h3>
             <ol>
-                <li>Vào <strong>WP Admin → Pages</strong>, xác định chính xác <strong>Đường dẫn (Slug)</strong> của trang (ví dụ: slug là <code>lien-he</code>).</li>
-                <li>Tạo file theo cú pháp <code>page-{slug}.php</code> đặt tại thư mục gốc theme (hoặc <code>page/page-{slug}.php</code> nếu dùng loader):
-                    <pre><code>ten-theme/page-lien-he.php</code></pre>
-                </li>
-                <li>Viết code cho file (không cần comment <code>Template Name:</code>). WordPress sẽ tự động kích hoạt file này mỗi khi người dùng truy cập link <code>domain.com/lien-he/</code>.</li>
-            </ol>
-
-            <!-- CÁCH 3 -->
-            <h3>Cách 3: Tạo Trang chủ (Front Page)</h3>
-            <ol>
-                <li>Tạo file <code>front-page.php</code> (hoặc <code>page/front-page.php</code>) ở theme.</li>
-                <li>Vào <strong>Pages → Add New</strong> tạo trang có tên <em>"Trang chủ"</em> (slug: <code>trang-chu</code>).</li>
-                <li>Vào <strong>Settings → Reading (Cài đặt → Đọc)</strong>:
+                <li>Tạo file <code>page/front-page.php</code> (hoặc <code>front-page.php</code> ở thư mục gốc theme).</li>
+                <li>Vào <strong>Admin → Trang (Pages) → Thêm trang mới</strong>, tạo trang có tên là <em>"Trang chủ"</em> (slug: <code>trang-chu</code>).</li>
+                <li>Vào <strong>Cài đặt → Đọc (Settings → Reading)</strong>:
                     <ul>
-                        <li>Tại <em>Your homepage displays</em>: chọn <strong>A static page</strong>.</li>
-                        <li>Mục <em>Homepage</em>: chọn trang <strong>Trang chủ</strong> vừa tạo.</li>
+                        <li>Tại mục <em>Bố cục trang chủ (Your homepage displays)</em>: chọn <strong>Một trang tĩnh (A static page)</strong>.</li>
+                        <li>Mục <em>Trang chủ (Homepage)</em>: chọn trang <strong>Trang chủ</strong> vừa tạo và bấm <strong>Lưu thay đổi</strong>.</li>
                     </ul>
                 </li>
             </ol>
 
-            <!-- SƯỜN CODE CHUẨN MẪU -->
-            <h2>III. Sườn code mẫu (Boilerplate) - Copy dán dùng ngay</h2>
-            <p>Sườn chuẩn mực cho mọi file template trang tĩnh, đã tích hợp đầy đủ header, footer, The Loop và các vị trí ghép section:</p>
+            <!-- PHẦN 3: BOILERPLATE -->
+            <h2>III. Khung code mẫu chuẩn (Boilerplate) - Copy dán dùng ngay</h2>
+            <p>Sườn code chuẩn mực đã tích hợp đầy đủ Header, Footer, The Loop, tiêu đề, nội dung và các vị trí ghép linh kiện:</p>
 
             <pre><code>&lt;?php
 /**
- * Template Name: [Điền tên trang hiển thị trong Admin]
- * Description: Template trang tĩnh chuyên dụng
+ * Template Name: [Tên hiển thị nếu là template chọn tay]
+ * Description: Template trang tùy biến chuẩn WordPress
  */
 
 // 1. Nạp Header
@@ -141,10 +124,9 @@ get_header(); ?&gt;
 
     &lt;?php
     // 3. Vòng lặp WordPress Loop chuẩn
-    while ( have_posts() ) :
-        the_post(); ?&gt;
+    while ( have_posts() ) : the_post(); ?&gt;
 
-        &lt;!-- Khối Banner / Tiêu đề --&gt;
+        &lt;!-- Tiêu đề trang --&gt;
         &lt;header class="page-header container"&gt;
             &lt;h1 class="page-title"&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
             &lt;?php if ( has_excerpt() ) : ?&gt;
@@ -152,14 +134,14 @@ get_header(); ?&gt;
             &lt;?php endif; ?&gt;
         &lt;/header&gt;
 
-        &lt;!-- Nội dung editor nhập từ Admin (nếu có) --&gt;
+        &lt;!-- Nội dung soạn thảo từ Admin (nếu có) --&gt;
         &lt;?php if ( get_the_content() ) : ?&gt;
-            &lt;div class="page-entry-content container"&gt;
+            &lt;div class="entry-content container"&gt;
                 &lt;?php the_content(); ?&gt;
             &lt;/div&gt;
         &lt;?php endif; ?&gt;
 
-        &lt;!-- Các khối Section ghép từ template-parts --&gt;
+        &lt;!-- 4. Ghép các khối Section linh kiện (nếu chia nhỏ trong template-parts) --&gt;
         &lt;div class="page-sections"&gt;
             &lt;?php
             // get_template_part( 'template-parts/section/intro' );
@@ -168,78 +150,125 @@ get_header(); ?&gt;
             ?&gt;
         &lt;/div&gt;
 
-    &lt;?php
-    endwhile; // Kết thúc Loop
-    ?&gt;
+    &lt;?php endwhile; // Kết thúc Loop ?&gt;
 
 &lt;/main&gt;
 
-&lt;?php
-// 4. Nạp Footer
-get_footer();
-?&gt;</code></pre>
+&lt;!-- 5. Nạp Footer --&gt;
+&lt;?php get_footer(); ?&gt;</code></pre>
 
-            <!-- PHẦN 4: LƯU Ý VỀ THE LOOP -->
-            <h2>IV. Những lưu ý quan trọng về cách dùng The Loop</h2>
-            <p>Cú pháp <code>while ( have_posts() ) : the_post();</code> là vòng lặp tiêu chuẩn (The Loop) của WordPress. Khi code Page cứng, bạn cần nắm vững các nguyên tắc sau:</p>
+            <!-- PHẦN 4: TÍCH HỢP NÂNG CAO -->
+            <h2>IV. Tích hợp nâng cao: Custom Fields &amp; CSS/JS riêng</h2>
 
-            <div class="note">
-                <strong>1. Tại sao trang đơn chỉ có 1 bài mà vẫn cần vòng lặp <code>while</code>?</strong><br>
-                Ở trang đơn (Page hoặc Single), vòng lặp <code>while</code> này chỉ chạy <strong>đúng 1 lần duy nhất</strong>. Mục đích then chốt nằm ở hàm <code>the_post()</code>: nó khởi tạo đối tượng trang hiện tại và nạp dữ liệu vào biến toàn cục <code>$post</code>.
-            </div>
+            <h3>1. Lấy dữ liệu Custom Fields (thay thế ACF)</h3>
+            <p>Khi dùng bộ Custom Fields tự viết thuần (xem thêm bài <a href="fields.html">Custom Field thay ACF</a> và bài <a href="tra-cuu-field.html">Tra cứu 15 kiểu field</a>), bạn lấy dữ liệu ngay trong template bằng các hàm gọn gàng:</p>
+
+            <pre><code>// Lấy trường chữ (text, number, url...)
+$hotline = ten_field( 'hotline' );
+if ( $hotline ) {
+    echo '&lt;p class="hotline"&gt;Hotline: &lt;strong&gt;' . esc_html( $hotline ) . '&lt;/strong&gt;&lt;/p&gt;';
+}
+
+// In ảnh đại diện kích thước lớn ('full', 'large', hoặc custom size)
+echo ten_image( 'anh_banner', 'full' );
+
+// Lấy danh sách repeater hoặc dữ liệu mảng
+$features = ten_field( 'danh_sach_tinh_nang' );
+if ( ! empty( $features ) && is_array( $features ) ) {
+    echo '&lt;ul class="feature-list"&gt;';
+    foreach ( $features as $item ) {
+        echo '&lt;li&gt;' . esc_html( $item['title'] ?? '' ) . '&lt;/li&gt;';
+    }
+    echo '&lt;/ul&gt;';
+}</code></pre>
+
+            <h3>2. Tự động nạp CSS &amp; JS riêng cho trang (Auto-Enqueue)</h3>
+            <p>Để tối ưu tốc độ tải trang (PageSpeed), không nên nhồi toàn bộ CSS/JS vào một file khổng lồ. Theme có thể kích hoạt cơ chế tự quét và nạp file tương ứng trong thư mục <code>assets/</code>:</p>
 
             <table>
                 <tr>
-                    <th>Tình huống</th>
-                    <th>Có cần The Loop không?</th>
-                    <th>Giải thích chi tiết</th>
+                    <th>Trang đang xem</th>
+                    <th>File CSS tự nạp</th>
+                    <th>File JS tự nạp</th>
                 </tr>
                 <tr>
-                    <td><strong>Trang có xuất dữ liệu động</strong></td>
-                    <td><strong>Bắt buộc dùng</strong></td>
-                    <td>Để các hàm <code>the_title()</code>, <code>the_content()</code>, <code>the_post_thumbnail()</code> và <code>get_the_ID()</code> (dùng lấy Custom Field) nhận diện chính xác dữ liệu của trang hiện tại.</td>
+                    <td><strong>Trang chủ</strong></td>
+                    <td><code>assets/css/front-page.css</code></td>
+                    <td><code>assets/js/front-page.js</code></td>
                 </tr>
                 <tr>
-                    <td><strong>Trang có dùng Plugin SEO &amp; Shortcode</strong></td>
-                    <td><strong>Bắt buộc dùng</strong></td>
-                    <td>Plugin SEO (Yoast, Rank Math) và các shortcode (Contact Form 7...) hoạt động dựa trên hook của <code>the_post()</code> để tính toán điểm SEO, tạo Canonical URL và lấy ID bài.</td>
+                    <td><strong>Trang Liên hệ</strong> (slug: <code>lien-he</code>)</td>
+                    <td><code>assets/css/page-lien-he.css</code></td>
+                    <td><code>assets/js/page-lien-he.js</code></td>
                 </tr>
                 <tr>
-                    <td><strong>Landing Page thuần HTML tĩnh 100%</strong></td>
-                    <td><strong>Có thể bỏ</strong></td>
-                    <td>Nếu toàn bộ trang được viết bằng mã HTML cố định, không dùng bất kỳ hàm WordPress nào, bạn có thể lược bỏ The Loop mà trang vẫn chạy bình thường.</td>
+                    <td><strong>Template Landing</strong> (tên file: <code>template-landing.php</code>)</td>
+                    <td><code>assets/css/template-landing.css</code></td>
+                    <td><code>assets/js/template-landing.js</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Tất cả các Page khác</strong> (dự phòng chung)</td>
+                    <td><code>assets/css/page.css</code></td>
+                    <td><code>assets/js/page.js</code></td>
                 </tr>
             </table>
 
-            <h3>2. Lưu ý tối quan trọng khi có vòng lặp phụ (Custom Query)</h3>
-            <p>Khi trong Page cứng có truy vấn thêm dữ liệu khác (ví dụ: lấy 4 thành viên đội ngũ hoặc 3 tin tức mới nhất bằng <code>new WP_Query()</code>):</p>
-            <ul>
-                <li>Vòng lặp phụ sẽ ghi đè biến <code>$post</code> của trang chính.</li>
-                <li><strong>Bắt buộc</strong> phải gọi hàm <code>wp_reset_postdata();</code> ngay sau khi kết thúc vòng lặp phụ để khôi phục lại dữ liệu của Trang chính:</li>
-            </ul>
+            <p>Đoạn mã xử lý tự động nạp assets đặt trong <code>functions.php</code>:</p>
+            <pre><code>function theme_page_assets() {
+    if ( ! is_page() && ! is_front_page() ) {
+        return;
+    }
 
-            <pre><code>&lt;?php
-$custom_query = new WP_Query( array(
-    'post_type'      =&gt; 'tin-tuc',
-    'posts_per_page' =&gt; 3,
-) );
+    $theme_dir = get_template_directory();
+    $theme_uri = get_template_directory_uri();
 
-if ( $custom_query-&gt;have_posts() ) :
-    while ( $custom_query-&gt;have_posts() ) : $custom_query-&gt;the_post();
-        // Lặp qua từng tin tức
-        the_title();
-    endwhile;
+    // 1. Xác định tên định danh theo trang: front-page hoặc page-{slug}
+    if ( is_front_page() ) {
+        $asset_name = 'front-page';
+    } else {
+        global $post;
+        $asset_name = 'page-' . ( $post->post_name ?? '' );
+    }
 
-    // BẮT BUỘC: Khôi phục lại ngữ cảnh $post của trang chính!
-    wp_reset_postdata();
-endif;
-?&gt;</code></pre>
-            <p>Nếu quên <code>wp_reset_postdata()</code>, toàn bộ các hàm ở phía sau (như Footer, widget, Custom Fields của trang chính) sẽ nhận nhầm ID của bài viết cuối cùng trong vòng lặp phụ.</p>
+    // 2. Tự nạp CSS nếu file tồn tại
+    if ( file_exists( $theme_dir . "/assets/css/{$asset_name}.css" ) ) {
+        wp_enqueue_style( "theme-{$asset_name}", $theme_uri . "/assets/css/{$asset_name}.css", array(), filemtime( $theme_dir . "/assets/css/{$asset_name}.css" ) );
+    } elseif ( file_exists( $theme_dir . '/assets/css/page.css' ) ) {
+        wp_enqueue_style( 'theme-page-default', $theme_uri . '/assets/css/page.css', array(), filemtime( $theme_dir . '/assets/css/page.css' ) );
+    }
 
-            <!-- VÍ DỤ ỨNG DỤNG THỰC TẾ -->
-            <h2>V. Ví dụ ứng dụng thực tế</h2>
+    // 3. Tự nạp JS nếu file tồn tại
+    if ( file_exists( $theme_dir . "/assets/js/{$asset_name}.js" ) ) {
+        wp_enqueue_script( "theme-{$asset_name}", $theme_uri . "/assets/js/{$asset_name}.js", array( 'jquery' ), filemtime( $theme_dir . "/assets/js/{$asset_name}.js" ), true );
+    } elseif ( file_exists( $theme_dir . '/assets/js/page.js' ) ) {
+        wp_enqueue_script( 'theme-page-default', $theme_uri . '/assets/js/page.js', array( 'jquery' ), filemtime( $theme_dir . '/assets/js/page.js' ), true );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'theme_page_assets' );</code></pre>
 
-            <h3>1. Trang chủ (front-page.php)</h3>
+            <!-- PHẦN 5: LƯU Ý & XỬ LÝ LỖI -->
+            <h2>V. Những lưu ý quan trọng và cách khắc phục lỗi</h2>
+
+            <div class="note">
+                <strong>⚠️ Quên vòng lặp The Loop:</strong><br>
+                Nếu không có <code>while ( have_posts() ) : the_post();</code>, các hàm như <code>the_title()</code>, <code>the_content()</code>, <code>the_post_thumbnail()</code> hoặc <code>ten_field()</code> sẽ không lấy được đúng dữ liệu của trang hiện tại. Ngoài ra, các plugin SEO (Rank Math, Yoast SEO) và shortcode sẽ bị sai lệch ngữ cảnh.<br>
+                👉 <em>Xem bài phân tích chi tiết: <a href="the-loop.html">Khi nào nên dùng while ( have_posts() ) : the_post();</a></em>
+            </div>
+
+            <div class="note">
+                <strong>⚠️ Vòng lặp phụ (Custom Query) đè dữ liệu trang chính:</strong><br>
+                Khi trong Page cứng có truy vấn thêm dữ liệu khác (như lấy tin tức, đối tác, sản phẩm bằng <code>new WP_Query()</code>), bạn <strong>bắt buộc</strong> phải gọi <code>wp_reset_postdata();</code> ngay sau khi kết thúc loop phụ. Nếu quên, toàn bộ mã phía dưới và Footer sẽ nhận nhầm ID của bài viết cuối cùng trong loop phụ!
+            </div>
+
+            <div class="note">
+                <strong>⚠️ Gặp lỗi 404 sau khi tạo trang:</strong><br>
+                Vào ngay <strong>Cài đặt → Đường dẫn tĩnh (Settings → Permalinks)</strong> và bấm nút <strong>Lưu thay đổi (Save Changes)</strong> một lần để WordPress làm mới lại bộ nhớ đệm (Flush Rewrite Rules).
+            </div>
+
+            <!-- PHẦN 6: VÍ DỤ THỰC TẾ -->
+            <h2>VI. Ví dụ ứng dụng thực tế</h2>
+
+            <h3>1. Trang chủ (page/front-page.php)</h3>
             <pre><code>&lt;?php
 /**
  * Template Name: Trang chủ
@@ -248,6 +277,7 @@ get_header(); ?&gt;
 
 &lt;main id="primary" class="site-main front-page"&gt;
     &lt;?php
+    // Ghép các section tái sử dụng từ template-parts/section/
     get_template_part( 'template-parts/section/hero' );
     get_template_part( 'template-parts/section/intro' );
     get_template_part( 'template-parts/section/services' );
@@ -263,6 +293,7 @@ get_header(); ?&gt;
             <pre><code>&lt;?php
 /**
  * Template Name: Trang Đội ngũ
+ * Template Post Type: page
  */
 get_header(); ?&gt;
 
@@ -285,6 +316,7 @@ get_header(); ?&gt;
             while ( $team_query-&gt;have_posts() ) : $team_query-&gt;the_post();
                 get_template_part( 'template-parts/loop/card', 'thanh-vien' );
             endwhile;
+            // Bắt buộc reset postdata để bảo toàn biến $post của Page chính!
             wp_reset_postdata();
         else :
             get_template_part( 'template-parts/loop/none' );
@@ -299,6 +331,7 @@ get_header(); ?&gt;
             <pre><code>&lt;?php
 /**
  * Template Name: Trang Liên hệ
+ * Template Post Type: page
  */
 get_header(); ?&gt;
 
@@ -307,7 +340,7 @@ get_header(); ?&gt;
         &lt;div class="contact-info"&gt;
             &lt;h1&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
             &lt;p&gt;&lt;strong&gt;Địa chỉ:&lt;/strong&gt; 123 Đường ABC, Quận 1, TP. HCM&lt;/p&gt;
-            &lt;p&gt;&lt;strong&gt;Hotline:&lt;/strong&gt; &lt;a href="tel:0901234567"&gt;090 123 4567&lt;/a&gt;&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Hotline:&lt;/strong&gt; &lt;a href="tel:0901234567"&gt;&lt;?php echo esc_html( ten_field( 'hotline' ) ?: '090 123 4567' ); ?&gt;&lt;/a&gt;&lt;/p&gt;
             &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; &lt;a href="mailto:contact@domain.com"&gt;contact@domain.com&lt;/a&gt;&lt;/p&gt;
             &lt;div class="map-embed"&gt;
                 &lt;iframe src="https://maps.google.com/..." width="100%" height="280" style="border:0;" loading="lazy"&gt;&lt;/iframe&gt;
@@ -325,7 +358,7 @@ get_header(); ?&gt;
 
             <div class="page-nav">
                 <a href="template-parts.html">← Template parts</a>
-                <a href="dang-ky-post-type.html" class="next">Đăng ký Post Type, Taxonomy, Option →</a>
+                <a href="the-loop.html" class="next">Khi nào dùng The Loop →</a>
             </div>
         </main>
     </div>
@@ -333,3 +366,4 @@ get_header(); ?&gt;
 </body>
 
 </html>
+

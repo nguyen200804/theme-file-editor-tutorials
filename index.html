@@ -1,51 +1,174 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bắt đầu - Hướng dẫn cấu hình theme WordPress</title>
+    <title>Danh sách bài viết - Hướng dẫn cấu hình theme WordPress</title>
     <meta name="description"
-        content="Hướng dẫn cấu hình theme WordPress trong Theme File Editor: bắt đầu, cấu trúc thư mục, template parts, page cứng và custom field.">
+        content="Tổng hợp toàn bộ các bài viết hướng dẫn lập trình, tổ chức template, loop item, custom post type, custom field và xử lý sự cố trong WordPress Theme File Editor.">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="wrap">
-        <nav aria-label="Mục lục">
-            <b>Theme WordPress</b>
-            <a href="index.html" class="active">Bắt đầu</a>
-            <a href="cau-truc.html">Cấu trúc thư mục</a>
-            <a href="thu-tu.html">Thứ tự chọn template</a>
-            <a href="loader.html">Gom file vào folder</a>
-            <a href="template-parts.html">Template parts</a>
-            <a href="page-cung.html">Tạo Page cứng</a>
-            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
-            <a href="archive.html">Tạo Template Archive</a>
-            <a href="single.html">Tạo Template Single Post-type</a>
-            <a href="fields.html">Custom field thay ACF</a>
-            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
-            <a href="sua-loi.html">Xử lý sự cố</a>
-        </nav>
         <main>
-            <h1>Hướng dẫn cấu hình theme WordPress</h1>
-            <p class="lead">Cách tổ chức file trong Theme File Editor: template cho trang, bài viết, danh sách, phần
-                dùng lại, tạo page cứng (trang chủ, giới thiệu, đội ngũ, liên hệ...) và custom field tự viết thay ACF.</p>
+            <h1>Danh sách bài viết hướng dẫn Theme WordPress</h1>
+            <p class="lead">Tổng hợp trọn bộ 15 bài viết chuyên sâu về kỹ thuật xây dựng và tùy biến Classic Theme
+                WordPress qua Theme File Editor (hoặc code tay thuần), không phụ thuộc vào plugin nặng.</p>
 
-            <h2>Bắt đầu</h2>
-            <p>Theme chỉ cần 2 file: <code>style.css</code> và <code>index.php</code>. Mọi file khác thêm khi cần.</p>
-            <ol>
-                <li>Tạo file bằng FTP hoặc cPanel File Manager. Theme File Editor không có nút tạo file mới.</li>
-                <li>Sửa nội dung trong <strong>Appearance → Theme File Editor</strong>.</li>
-                <li>Làm trong child theme và sao lưu trước khi sửa. Một lỗi cú pháp PHP có thể làm sập site.</li>
-            </ol>
             <div class="note">
-                Block theme (Twenty Twenty-Four...) không có Theme File Editor và dùng <code>templates/*.html</code>.
-                Hướng dẫn này dành cho classic theme.
+                <strong>Lưu ý nền tảng:</strong> Theme WordPress chỉ cần tối thiểu 2 file: <code>style.css</code> và
+                <code>index.php</code>. Hãy luôn thao tác trên <strong>Child Theme</strong> và sao lưu trước khi chỉnh
+                sửa trong <em>Appearance → Theme File Editor</em>.
             </div>
 
+            <!-- NHÓM 1 -->
+            <section class="article-section">
+                <h2>1. Nền tảng & Cấu trúc Theme</h2>
+                <div class="article-grid">
+                    <a href="cau-truc.html" class="article-card">
+                        <span class="num">Bài 01</span>
+                        <h3>Cấu trúc thư mục</h3>
+                        <p>Quy chuẩn sắp xếp thư mục và tập tin: tách biệt template, template-parts, assets và inc giúp
+                            theme gọn gàng, dễ mở rộng.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="thu-tu.html" class="article-card">
+                        <span class="num">Bài 02</span>
+                        <h3>Thứ tự chọn template</h3>
+                        <p>Hiểu cơ chế Template Hierarchy của WordPress: thứ tự ưu tiên từ file chi tiết (ID/slug) đến
+                            file dự phòng (fallback).</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="loader.html" class="article-card">
+                        <span class="num">Bài 03</span>
+                        <h3>Gom file vào folder (Loader)</h3>
+                        <p>Kỹ thuật viết hàm nạp file tự động trong <code>functions.php</code> cho các module trong thư
+                            mục <code>inc/</code> mà không cần require thủ công.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="template-parts.html" class="article-card">
+                        <span class="num">Bài 04</span>
+                        <h3>Template parts</h3>
+                        <p>Tổ chức và tái sử dụng các khối giao diện (header, card, banner) bằng hàm
+                            <code>get_template_part()</code> kèm truyền mảng biến <code>$args</code>.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- NHÓM 2 -->
+            <section class="article-section">
+                <h2>2. Post Type, Taxonomy & Page Template</h2>
+                <div class="article-grid">
+                    <a href="dang-ky-post-type.html" class="article-card">
+                        <span class="num">Bài 05</span>
+                        <h3>Đăng ký Post Type, Taxonomy & Option Page</h3>
+                        <p>Tạo Custom Post Type (dự án, sản phẩm), Taxonomy (chuyên mục dự án) và trang cài đặt Option
+                            Page bằng code PHP thuần.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="page-cung.html" class="article-card">
+                        <span class="num">Bài 06</span>
+                        <h3>Tạo Page cứng (Page Template)</h3>
+                        <p>Xây dựng template cho các trang nội dung đặc thù như Trang chủ, Giới thiệu, Liên hệ, Đội ngũ
+                            theo Template Name hoặc slug.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="the-loop.html" class="article-card">
+                        <span class="num">Bài 07</span>
+                        <h3>Khi nào nên dùng The Loop</h3>
+                        <p>Giải mã bản chất <code>while ( have_posts() ) : the_post();</code>, vì sao trang đơn vẫn cần dùng và trường hợp có thể bỏ qua.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- NHÓM 3 -->
+            <section class="article-section">
+                <h2>3. Vòng lặp Loop & Giao diện Hiển thị</h2>
+                <div class="article-grid">
+                    <a href="loop-item.html" class="article-card">
+                        <span class="num">Bài 08</span>
+                        <h3>Tạo Loop Item (Card Reusable)</h3>
+                        <p>Thiết kế card template part tái sử dụng cho bài viết thường, Custom Post Type, chuyên mục
+                            Taxonomy và trạng thái rỗng (none).</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="archive.html" class="article-card">
+                        <span class="num">Bài 09</span>
+                        <h3>Tạo Template Archive</h3>
+                        <p>Xây dựng trang danh mục bài viết, danh sách dự án CPT, taxonomy archive và tích hợp phân
+                            trang chuẩn SEO bằng <code>paginate_links()</code>.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="pagination.html" class="article-card">
+                        <span class="num">Bài 10</span>
+                        <h3>Custom UI Pagination</h3>
+                        <p>Tùy biến giao diện phân trang chuẩn WordPress, bóc tách component trong <code>template-parts/ui/</code>, hỗ trợ Main Query và custom WP_Query.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="single.html" class="article-card">
+                        <span class="num">Bài 11</span>
+                        <h3>Tạo Template Single Post-type</h3>
+                        <p>Kỹ thuật dựng trang chi tiết bài viết, chi tiết CPT, cơ chế The Loop
+                            (<code>have_posts() / the_post()</code>) và các lưu ý quan trọng.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- NHÓM 4 -->
+            <section class="article-section">
+                <h2>4. Custom Fields & Tra cứu Dữ liệu</h2>
+                <div class="article-grid">
+                    <a href="fields.html" class="article-card">
+                        <span class="num">Bài 12</span><h3>Custom Field thay ACF</h3>
+                        <p>Tự viết Meta Box và lưu dữ liệu trường tùy biến bằng PHP thuần nhẹ nhàng, an toàn bảo mật với
+                            Nonce, không cần cài plugin bên ngoài.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="tra-cuu-field.html" class="article-card">
+                        <span class="num">Bài 13</span><h3>Tra cứu 15 kiểu field</h3>
+                        <p>Thư viện code mẫu 15 loại input: Text, Textarea, WYSIWYG, Image upload, Repeater, Select,
+                            Radio, Checkbox, Color picker...</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+
+                    <a href="tra-cuu-du-lieu.html" class="article-card">
+                        <span class="num">Bài 14</span><h3>Tra cứu hàm lấy dữ liệu</h3>
+                        <p>Cheat sheet tra cứu lấy ảnh đại diện, terms, ngày giờ, custom field, excerpt, URL bài viết và
+                            toàn bộ dữ liệu bình luận (comment).</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- NHÓM 5 -->
+            <section class="article-section">
+                <h2>5. Vận hành & Xử lý sự cố</h2>
+                <div class="article-grid">
+                    <a href="sua-loi.html" class="article-card">
+                        <span class="num">Bài 15</span><h3>Xử lý sự cố (Troubleshooting)</h3>
+                        <p>Cách xử lý lỗi trắng trang (WSOD), lỗi cú pháp PHP, lỗi 404 permalink khi tạo CPT, và lỗi
+                            phân quyền không lưu được file trong Theme Editor.</p>
+                        <span class="meta">Xem bài viết →</span>
+                    </a>
+                </div>
+            </section>
+
             <div class="page-nav">
-                <a href="cau-truc.html" class="next">Cấu trúc thư mục →</a>
+                <a href="cau-truc.html" class="next">Bài tiếp theo: Cấu trúc thư mục →</a>
             </div>
         </main>
     </div>
@@ -53,3 +176,5 @@
 </body>
 
 </html>
+
+

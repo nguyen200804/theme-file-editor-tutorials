@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -11,21 +11,9 @@
 
 <body>
     <div class="wrap">
-        <nav aria-label="Mục lục">
-            <b>Theme WordPress</b>
-            <a href="index.html">Bắt đầu</a>
-            <a href="cau-truc.html">Cấu trúc thư mục</a>
-            <a href="thu-tu.html">Thứ tự chọn template</a>
-            <a href="loader.html">Gom file vào folder</a>
-            <a href="template-parts.html">Template parts</a>
-            <a href="page-cung.html">Tạo Page cứng</a>
-            <a href="dang-ky-post-type.html">Đăng ký Post Type, Taxonomy, Option</a>
-            <a href="archive.html" class="active">Tạo Template Archive</a>
-            <a href="single.html">Tạo Template Single Post-type</a>
-            <a href="fields.html">Custom field thay ACF</a>
-            <a href="tra-cuu-field.html">Tra cứu kiểu field</a>
-            <a href="sua-loi.html">Xử lý sự cố</a>
-        </nav>
+                <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
         <main>
             <h1>Tạo Template Archive (Trang danh sách)</h1>
             <p class="lead">Template Archive dùng để hiển thị danh sách bài viết theo chuyên mục (Category), thẻ (Tag), tác giả (Author) hoặc danh sách của Custom Post Type (Sản phẩm, Dự án, Tin tức...).</p>
@@ -182,8 +170,8 @@ add_action( 'pre_get_posts', 'ten_theme_customize_archive' );</code></pre>
             <pre><code>add_filter( 'get_the_archive_title_prefix', '__return_empty_string' );</code></pre>
 
             <div class="page-nav">
-                <a href="dang-ky-post-type.html">← Đăng ký Post Type, Taxonomy, Option</a>
-                <a href="single.html" class="next">Tạo Template Single Post-type →</a>
+                <a href="loop-item.html">← Tạo Loop Item</a>
+                <a href="pagination.html" class="next">Custom UI Pagination →</a>
             </div>
         </main>
     </div>
@@ -191,4 +179,8 @@ add_action( 'pre_get_posts', 'ten_theme_customize_archive' );</code></pre>
 </body>
 
 </html>
+
+
+
+
 

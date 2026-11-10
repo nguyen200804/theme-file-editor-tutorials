@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tra cứu hàm lấy dữ liệu - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description" content="Bảng tra cứu các hàm WordPress lấy dữ liệu bài viết: Featured image, Taxonomy terms, Date, Time, Excerpt, Content, Permalink, Custom field.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+                <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
+        <main>
+            <h1>Tra cứu hàm lấy dữ liệu bài viết</h1>
+            <p class="lead">Bảng tổng hợp nhanh các hàm chuẩn WordPress để lấy thông tin bài viết (Post / CPT): ảnh đại diện, chuyên mục, ngày giờ, trích dẫn, nội dung và trường dữ liệu tùy biến (Custom Field).</p>
+
+            <div class="note">
+                <strong>Quy tắc vàng phân biệt giữa <code>the_*</code> và <code>get_the_*</code>:</strong>
+                <ul>
+                    <li>Hàm bắt đầu bằng <strong><code>the_...</code></strong>: Tự động in (echo) thẳng dữ liệu ra màn hình HTML (VD: <code>&lt;?php the_title(); ?&gt;</code>).</li>
+                    <li>Hàm bắt đầu bằng <strong><code>get_the_...</code></strong>: Trả về giá trị chuỗi/mảng để gán vào biến hoặc kiểm tra điều kiện <code>if</code> (VD: <code>$title = get_the_title();</code>).</li>
+                </ul>
+            </div>
+
+            <!-- BẢNG TRA CỨU NHANH -->
+            <h2>Bảng tra cứu nhanh</h2>
+            <table>
+                <tr>
+                    <th>Dữ liệu cần lấy</th>
+                    <th>In trực tiếp (Echo)</th>
+                    <th>Lấy giá trị (Return)</th>
+                </tr>
+                <tr>
+                    <td><strong>Link bài viết (Post URL)</strong></td>
+                    <td><code>the_permalink()</code></td>
+                    <td><code>get_permalink()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Tiêu đề bài viết</strong></td>
+                    <td><code>the_title()</code></td>
+                    <td><code>get_the_title()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Ảnh đại diện (Featured Image)</strong></td>
+                    <td><code>the_post_thumbnail('size')</code></td>
+                    <td><code>get_the_post_thumbnail_url($id, 'size')</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Chuyên mục / Taxonomy Term</strong></td>
+                    <td><code>the_terms($id, 'tax', '', ', ')</code></td>
+                    <td><code>get_the_terms($id, 'taxonomy')</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Ngày đăng bài (Date)</strong></td>
+                    <td><code>echo get_the_date('d/m/Y')</code></td>
+                    <td><code>get_the_date('d/m/Y')</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Giờ đăng bài (Time)</strong></td>
+                    <td><code>echo get_the_time('H:i')</code></td>
+                    <td><code>get_the_time('H:i')</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Trích dẫn ngắn (Excerpt)</strong></td>
+                    <td><code>the_excerpt()</code></td>
+                    <td><code>get_the_excerpt()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Nội dung chi tiết (Content / Desc)</strong></td>
+                    <td><code>the_content()</code></td>
+                    <td><code>get_the_content()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>ID bài viết hiện tại</strong></td>
+                    <td><code>the_ID()</code></td>
+                    <td><code>get_the_ID()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Custom Field (Code thuần)</strong></td>
+                    <td><code>echo esc_html(ten_field('key'))</code></td>
+                    <td><code>ten_field('key')</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Custom Field (WordPress Native)</strong></td>
+                    <td><code>echo get_post_meta($id, 'key', true)</code></td>
+                    <td><code>get_post_meta($id, 'key', true)</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Số lượng bình luận</strong></td>
+                    <td><code>comments_number('0', '1', '%')</code></td>
+                    <td><code>get_comments_number()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Tên người bình luận</strong></td>
+                    <td><code>comment_author()</code></td>
+                    <td><code>get_comment_author()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Ảnh đại diện bình luận (Avatar)</strong></td>
+                    <td><code>echo get_avatar($comment, 48)</code></td>
+                    <td><code>get_avatar_url($comment)</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Ngày &amp; Giờ bình luận</strong></td>
+                    <td><code>comment_date('d/m/Y')</code></td>
+                    <td><code>get_comment_date()</code> / <code>get_comment_time()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Nội dung bình luận</strong></td>
+                    <td><code>comment_text()</code></td>
+                    <td><code>get_comment_text()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Nút trả lời (Reply link)</strong></td>
+                    <td><code>comment_reply_link(...)</code></td>
+                    <td><code>get_comment_reply_link(...)</code></td>
+                </tr>
+            </table>
+
+            <!-- 1. POST URL -->
+            <h2>1. Lấy Post URL (Đường dẫn bài viết)</h2>
+            <p>Dùng để gắn link vào tiêu đề hoặc nút "Xem chi tiết".</p>
+            <pre><code>&lt;!-- Cách 1: In trực tiếp --&gt;
+&lt;a href="&lt;?php the_permalink(); ?&gt;"&gt;&lt;?php the_title(); ?&gt;&lt;/a&gt;
+
+&lt;!-- Cách 2: Lấy URL gán vào biến để xử lý logic --&gt;
+&lt;?php
+$post_url = get_permalink();
+echo '&lt;a href="' . esc_url( $post_url ) . '" class="btn-more"&gt;Xem chi tiết&lt;/a&gt;';
+?&gt;</code></pre>
+
+            <!-- 2. FEATURED IMAGE -->
+            <h2>2. Lấy Featured Image (Ảnh đại diện)</h2>
+
+            <h3>Cách 1: In thẻ <code>&lt;img&gt;</code> hoàn chỉnh tự động chuẩn responsive</h3>
+            <pre><code>&lt;?php if ( has_post_thumbnail() ) : ?&gt;
+    &lt;a href="&lt;?php the_permalink(); ?&gt;" class="post-thumb"&gt;
+        &lt;?php the_post_thumbnail( 'medium', array( 'alt' =&gt; the_title_attribute( 'echo=0' ) ) ); ?&gt;
+    &lt;/a&gt;
+&lt;?php else : ?&gt;
+    &lt;!-- Ảnh mặc định khi bài viết chưa có ảnh đại diện --&gt;
+    &lt;img src="&lt;?php echo esc_url( get_theme_file_uri( 'assets/images/no-image.jpg' ) ); ?&gt;" alt="No image"&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h3>Cách 2: Lấy riêng chuỗi URL của ảnh (Làm Background CSS hoặc Slider)</h3>
+            <pre><code>&lt;?php
+// Lấy URL ảnh với kích thước tùy chọn: 'thumbnail', 'medium', 'large', 'full'
+$thumb_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
+?&gt;
+&lt;div class="banner-hero" style="background-image: url('&lt;?php echo esc_url( $thumb_url ); ?&gt;');"&gt;
+    &lt;h1&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
+&lt;/div&gt;</code></pre>
+
+            <!-- 3. TAXONOMY TERMS -->
+            <h2>3. Lấy Term của Post-Type (Danh mục / Phân loại)</h2>
+
+            <h3>Trường hợp 1: Lấy Term đầu tiên để làm Badge (Nhãn danh mục)</h3>
+            <pre><code>&lt;?php
+// Lấy danh sách term của taxonomy 'loai-du-an' (hoặc 'category')
+$terms = get_the_terms( get_the_ID(), 'loai-du-an' );
+
+if ( ! empty( $terms ) &amp;&amp; ! is_wp_error( $terms ) ) :
+    $first_term = $terms[0]; // Lấy danh mục đầu tiên
+    $term_link  = get_term_link( $first_term );
+    ?&gt;
+    &lt;a href="&lt;?php echo esc_url( $term_link ); ?&gt;" class="badge-category"&gt;
+        &lt;?php echo esc_html( $first_term-&gt;name ); ?&gt;
+    &lt;/a&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h3>Trường hợp 2: Lặp in toàn bộ các Term có ngăn cách bằng dấu phẩy</h3>
+            <pre><code>&lt;!-- Cách nhanh dùng the_terms --&gt;
+&lt;div class="post-tags"&gt;
+    &lt;?php the_terms( get_the_ID(), 'loai-du-an', 'Chuyên mục: ', ', ', '' ); ?&gt;
+&lt;/div&gt;</code></pre>
+
+            <!-- 4. DATE & TIME -->
+            <h2>4. Lấy Date &amp; Time (Ngày và Giờ đăng)</h2>
+            <div class="note">
+                <strong>Lưu ý:</strong> Luôn dùng <code>get_the_date()</code> thay vì <code>the_date()</code>. Vì hàm <code>the_date()</code> mặc định sẽ bị ẩn nếu có 2 bài viết được đăng trong cùng một ngày!
+            </div>
+
+            <pre><code>&lt;!-- Lấy ngày theo định dạng Việt Nam ngày/tháng/năm --&gt;
+&lt;span class="post-date"&gt;
+    📅 &lt;?php echo esc_html( get_the_date( 'd/m/Y' ) ); ?&gt;
+&lt;/span&gt;
+
+&lt;!-- Lấy giờ đăng bài (24 giờ: 14:30) --&gt;
+&lt;span class="post-time"&gt;
+    ⏰ &lt;?php echo esc_html( get_the_time( 'H:i' ) ); ?&gt;
+&lt;/span&gt;
+
+&lt;!-- Lấy thời gian tương đối ("cách đây 2 giờ", "3 ngày trước") --&gt;
+&lt;span class="time-ago"&gt;
+    &lt;?php echo esc_html( human_time_diff( get_the_time( 'U' ), current_time( 'timestamp' ) ) . ' trước' ); ?&gt;
+&lt;/span&gt;</code></pre>
+
+            <!-- 5. EXCERPT -->
+            <h2>5. Lấy Excerpt (Mô tả ngắn / Trích dẫn)</h2>
+            <pre><code>&lt;!-- Cách 1: In trực tiếp đoạn trích chuẩn (đã lọc thẻ HTML) --&gt;
+&lt;div class="post-excerpt"&gt;
+    &lt;?php the_excerpt(); ?&gt;
+&lt;/div&gt;
+
+&lt;!-- Cách 2: Cắt ngắn chính xác số lượng từ mong muốn (Ví dụ: đúng 20 từ) --&gt;
+&lt;p class="custom-excerpt"&gt;
+    &lt;?php echo esc_html( wp_trim_words( get_the_excerpt(), 20, '...' ) ); ?&gt;
+&lt;/p&gt;</code></pre>
+
+            <!-- 6. CONTENT / DESC -->
+            <h2>6. Lấy Desc / Content (Nội dung chi tiết bài viết)</h2>
+            <pre><code>&lt;!-- Trong file single.php hoặc single-{post_type}.php --&gt;
+&lt;div class="entry-content"&gt;
+    &lt;?php
+    // In nội dung đầy đủ (tự động chạy Shortcode, oEmbed video Youtube, khối Gutenberg)
+    the_content();
+    ?&gt;
+&lt;/div&gt;</code></pre>
+
+            <!-- 7. CUSTOM FIELD -->
+            <h2>7. Lấy trường dữ liệu Custom Field</h2>
+
+            <h3>Cách 1: Dùng hàm helper của bộ khung Theme (`ten_field`)</h3>
+            <pre><code>&lt;!-- 1. Lấy trường văn bản / số --&gt;
+&lt;span class="price"&gt;
+    Giá: &lt;?php echo esc_html( number_format_i18n( ten_field( 'gia' ) ) ); ?&gt; đ
+&lt;/span&gt;
+
+&lt;!-- 2. Lấy ảnh custom field --&gt;
+&lt;?php echo ten_image( 'anh_so_do', 'large' ); ?&gt;
+
+&lt;!-- 3. Lặp qua danh sách Repeater --&gt;
+&lt;ul class="features"&gt;
+    &lt;?php foreach ( (array) ten_field( 'dac_diem_noi_bat' ) as $row ) : ?&gt;
+        &lt;li&gt;&lt;?php echo esc_html( $row['ten_dac_diem'] ); ?&gt;&lt;/li&gt;
+    &lt;?php endforeach; ?&gt;
+&lt;/ul&gt;</code></pre>
+
+            <h3>Cách 2: Dùng hàm gốc WordPress (`get_post_meta`)</h3>
+            <pre><code>&lt;?php
+// get_post_meta( $post_id, $key, $single = true )
+$dia_diem = get_post_meta( get_the_ID(), 'dia_diem', true );
+if ( ! empty( $dia_diem ) ) {
+    echo '&lt;p class="location"&gt;Địa điểm: ' . esc_html( $dia_diem ) . '&lt;/p&gt;;';
+}
+?&gt;</code></pre>
+
+            <!-- 8. DỮ LIỆU BÌNH LUẬN (COMMENTS) -->
+            <h2>8. Tra cứu dữ liệu Bình luận (Comments)</h2>
+            <p>Hệ thống các hàm lấy dữ liệu bình luận của bài viết trong WordPress, từ hiển thị số lượng, danh sách thẻ bình luận đến form gửi phản hồi.</p>
+
+            <h3>1. Lấy số lượng bình luận</h3>
+            <pre><code>&lt;!-- Cách 1: In trực tiếp kèm chuỗi phân biệt số ít / số nhiều --&gt;
+&lt;span class="comment-count"&gt;
+    💬 &lt;?php comments_number( 'Chưa có bình luận', '1 bình luận', '% bình luận' ); ?&gt;
+&lt;/span&gt;
+
+&lt;!-- Cách 2: Lấy số lượng nguyên để kiểm tra điều kiện if --&gt;
+&lt;?php
+$cmt_count = get_comments_number();
+if ( $cmt_count &gt; 0 ) {
+    echo '&lt;span class="badge"&gt;' . esc_html( $cmt_count ) . ' phản hồi&lt;/span&gt;';
+}
+?&gt;</code></pre>
+
+            <h3>2. Lấy danh sách bình luận (Comment List)</h3>
+            <p>Trong file <code>comments.php</code>, dùng hàm <code>wp_list_comments()</code> để tự động in danh sách bình luận theo cấu trúc phân cấp (lồng nhau khi trả lời):</p>
+            <pre><code>&lt;ol class="comment-list"&gt;
+    &lt;?php
+    wp_list_comments( array(
+        'style'       =&gt; 'ol',
+        'short_ping'  =&gt; true,
+        'avatar_size' =&gt; 48, // Kích thước avatar (px)
+        'callback'    =&gt; 'ten_custom_comment_card', // (Tùy chọn) Hàm tự thiết kế layout bình luận
+    ) );
+    ?&gt;
+&lt;/ol&gt;</code></pre>
+
+            <h3>3. Tùy biến từng thẻ bình luận (Custom Comment Card)</h3>
+            <p>Khai báo hàm callback trong <code>functions.php</code> để làm chủ toàn bộ mã HTML từng dòng bình luận:</p>
+            <pre><code>function ten_custom_comment_card( $comment, $args, $depth ) { ?&gt;
+    &lt;li id="comment-&lt;?php comment_ID(); ?&gt;" &lt;?php comment_class( 'comment-item' ); ?&gt;&gt;
+        &lt;article class="comment-body"&gt;
+            
+            &lt;!-- 1. Ảnh đại diện Avatar (lấy theo Gravatar hoặc tài khoản) --&gt;
+            &lt;div class="comment-avatar"&gt;
+                &lt;?php echo get_avatar( $comment, $args['avatar_size'], '', 'Avatar', array( 'class' =&gt; 'avatar-img' ) ); ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="comment-content-wrap"&gt;
+                &lt;!-- 2. Tên người bình luận --&gt;
+                &lt;h4 class="comment-author"&gt;
+                    &lt;?php echo get_comment_author_link( $comment ); ?&gt;
+                &lt;/h4&gt;
+
+                &lt;!-- 3. Ngày và Giờ bình luận --&gt;
+                &lt;div class="comment-meta text-muted"&gt;
+                    &lt;time datetime="&lt;?php comment_time( 'c' ); ?&gt;"&gt;
+                        📅 &lt;?php echo get_comment_date( 'd/m/Y', $comment ); ?&gt; lúc &lt;?php echo get_comment_time( 'H:i', $comment ); ?&gt;
+                    &lt;/time&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Trạng thái chờ duyệt (khi bình luận mới gửi) --&gt;
+                &lt;?php if ( '0' == $comment-&gt;comment_approved ) : ?&gt;
+                    &lt;p class="comment-awaiting text-warning"&gt;&lt;em&gt;Bình luận của bạn đang chờ quản trị viên duyệt.&lt;/em&gt;&lt;/p&gt;
+                &lt;?php endif; ?&gt;
+
+                &lt;!-- 4. Nội dung văn bản bình luận --&gt;
+                &lt;div class="comment-text"&gt;
+                    &lt;?php comment_text(); ?&gt;
+                &lt;/div&gt;
+
+                &lt;!-- 5. Nút Trả lời (Reply) --&gt;
+                &lt;div class="comment-reply"&gt;
+                    &lt;?php
+                    comment_reply_link( array_merge( $args, array(
+                        'depth'     =&gt; $depth,
+                        'max_depth' =&gt; $args['max_depth'],
+                        'reply_text'=&gt; '↩ Trả lời',
+                    ) ) );
+                    ?&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+        &lt;/article&gt;
+&lt;?php }</code></pre>
+
+            <h3>4. Nạp khung Form gửi bình luận (Comment Form)</h3>
+            <p>Hàm <code>comment_form()</code> tự động tạo form gồm: ô nhập Họ tên, Email, Website, Nội dung và nút Gửi:</p>
+            <pre><code>&lt;!-- Đặt ở cuối file comments.php --&gt;
+&lt;?php
+comment_form( array(
+    'title_reply'        =&gt; 'Để lại bình luận của bạn',
+    'title_reply_to'     =&gt; 'Trả lời bình luận của %s',
+    'cancel_reply_link'  =&gt; 'Hủy trả lời',
+    'label_submit'       =&gt; 'Gửi bình luận',
+    'class_submit'       =&gt; 'btn btn-primary submit-btn',
+    'comment_field'      =&gt; '&lt;p class="comment-form-comment"&gt;&lt;textarea id="comment" name="comment" cols="45" rows="5" placeholder="Nội dung bình luận..." required&gt;&lt;/textarea&gt;&lt;/p&gt;',
+) );
+?&gt;</code></pre>
+
+            <div class="page-nav">
+                <a href="tra-cuu-field.html">← Tra cứu kiểu field</a>
+                <a href="sua-loi.html" class="next">Xử lý sự cố →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+
+
+

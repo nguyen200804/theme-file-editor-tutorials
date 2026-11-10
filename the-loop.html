@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Khi nào nên dùng The Loop - Hướng dẫn cấu hình theme WordPress</title>
+    <meta name="description"
+        content="Giải mã bản chất của The WordPress Loop while ( have_posts() ) : the_post();, lý do trang đơn vẫn cần dùng, và những trường hợp có thể bỏ qua.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap">
+                <header class="top-nav">
+            <a href="index.html">← Danh sách bài viết</a>
+        </header>
+        <main>
+            <h1>Khi nào nên dùng while ( have_posts() ) : the_post(); trong WordPress?</h1>
+            <p class="lead">Giải mã bản chất của The WordPress Loop, lý do vì sao trang đơn chỉ có 1 bài vẫn cần dùng, và những trường hợp bạn hoàn toàn có thể bỏ qua.</p>
+
+            <!-- PHẦN 1 -->
+            <h2>I. Bản chất thực sự của `the_post()` là gì?</h2>
+            <p>Cặp lệnh <code>while ( have_posts() ) : the_post();</code> được gọi là <strong>The Loop (Vòng lặp WordPress)</strong>. Nhiệm vụ của nó gồm 2 phần riêng biệt:</p>
+            <ul>
+                <li><strong><code>have_posts()</code>:</strong> Kiểm tra xem trong bộ nhớ truy vấn hiện tại (biến toàn cục <code>$wp_query</code>) còn bài viết nào chưa được lấy ra hay không.</li>
+                <li><strong><code>the_post()</code>:</strong> Lấy bài viết tiếp theo và nạp vào biến toàn cục <code>$post</code>, đồng thời thiết lập sẵn ID và ngữ cảnh của bài viết đó cho toàn bộ các hàm hiển thị phía sau.</li>
+            </ul>
+
+            <div class="note">
+                <strong>💡 Tác dụng then chốt của <code>the_post()</code>:</strong><br>
+                Nhờ có lệnh này thiết lập ngữ cảnh con trỏ, bạn mới có thể gọi trực tiếp các hàm template tag mà không cần truyền ID thủ công:
+                <ul style="margin-top: 8px; margin-bottom: 4px;">
+                    <li><code>the_title()</code>: Tự in tiêu đề của bài viết đang duyệt.</li>
+                    <li><code>the_content()</code>: Tự in nội dung, kích hoạt bộ lọc chạy shortcode, nhúng video oEmbed và tự ngắt dòng thẻ <code>&lt;p&gt;</code>.</li>
+                    <li><code>the_permalink()</code>: Tự in liên kết (URL) của bài viết.</li>
+                    <li><code>the_post_thumbnail()</code>: Tự lấy ảnh đại diện của bài viết.</li>
+                    <li>Hàm Custom Fields <code>ten_field('key')</code> hoặc ACF <code>get_field('key')</code>: Tự nhận diện chính xác bài viết đang xem.</li>
+                </ul>
+            </div>
+
+            <!-- PHẦN 2 -->
+            <h2>II. Khi nào BẮT BUỘC hoặc RẤT NÊN DÙNG?</h2>
+
+            <h3>1. Trang danh sách có nhiều bài viết (BẮT BUỘC)</h3>
+            <p>Áp dụng cho: <code>archive.php</code>, <code>category.php</code>, <code>tag.php</code>, <code>index.php</code>, <code>search.php</code>, <code>taxonomy.php</code>.</p>
+            <p>Vòng lặp sẽ duyệt qua từng bài viết trong mảng kết quả, chuyển đổi con trỏ ID sau mỗi vòng để render ra các thẻ Card tương ứng:</p>
+            <pre><code>&lt;?php if ( have_posts() ) : ?&gt;
+    &lt;div class="posts-grid"&gt;
+        &lt;?php while ( have_posts() ) : the_post(); ?&gt;
+            &lt;!-- Mỗi vòng lặp, the_post() đổi sang ID bài viết mới --&gt;
+            &lt;?php get_template_part( 'template-parts/loop/card', get_post_type() ); ?&gt;
+        &lt;?php endwhile; ?&gt;
+    &lt;/div&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h3>2. Trang chi tiết bài viết &amp; Trang tĩnh (RẤT NÊN DÙNG)</h3>
+            <p>Áp dụng cho: <code>single.php</code>, <code>single-{post_type}.php</code>, <code>page.php</code>, <code>page-{slug}.php</code>.</p>
+            <p>Ở các trang này chỉ có <strong>duy nhất 1 bài viết hoặc 1 trang</strong> (vòng lặp <code>while</code> chỉ chạy đúng 1 lần). Tuy nhiên, bạn vẫn rất nên giữ lại để các hàm hiển thị nội dung và plugin hoạt động chuẩn xác:</p>
+            <pre><code>&lt;?php while ( have_posts() ) : the_post(); ?&gt;
+    &lt;article id="post-&lt;?php the_ID(); ?&gt;" &lt;?php post_class(); ?&gt;&gt;
+        &lt;h1 class="entry-title"&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
+        &lt;div class="entry-content"&gt;
+            &lt;?php the_content(); ?&gt;
+        &lt;/div&gt;
+    &lt;/article&gt;
+&lt;?php endwhile; ?&gt;</code></pre>
+
+            <h3>3. Khi viết truy vấn danh sách tùy biến (`new WP_Query`)</h3>
+            <p>Khi bạn muốn lấy danh sách bài viết riêng biệt (ví dụ: lấy 6 bài viết mới nhất đưa ra Trang chủ hoặc 4 bài viết liên quan):</p>
+            <pre><code>&lt;?php
+$custom_query = new WP_Query( array(
+    'post_type'      =&gt; 'post',
+    'posts_per_page' =&gt; 6,
+) );
+
+if ( $custom_query-&gt;have_posts() ) :
+    while ( $custom_query-&gt;have_posts() ) : $custom_query-&gt;the_post();
+        get_template_part( 'template-parts/loop/card' );
+    endwhile;
+    wp_reset_postdata(); // Luôn reset query sau khi lặp xong!
+endif;
+?&gt;</code></pre>
+
+            <!-- PHẦN 3 -->
+            <h2>III. Khi nào bạn CÓ THỂ BỎ (Không cần dùng)?</h2>
+            <p>Vòng lặp này <strong>không bắt buộc về mặt kỹ thuật PHP</strong> (xóa đi trang web vẫn tải và không gây lỗi Fatal Error). Bạn có thể bỏ trong các trường hợp sau:</p>
+            <ol>
+                <li>
+                    <strong>Trang HTML tĩnh 100%:</strong> Giao diện Landing Page quảng cáo hoặc trang sự kiện viết toàn bộ bằng mã HTML cố định, không lấy tiêu đề hay nội dung từ khung soạn thảo Admin.
+                </li>
+                <li>
+                    <strong>Trang chỉ gọi dữ liệu theo ID cụ thể:</strong> Bạn không dùng các hàm tự động như <code>the_title()</code> mà tự lấy dữ liệu qua biến ID đã biết:
+                    <pre><code>$page_id = get_queried_object_id();
+$email   = get_post_meta( $page_id, 'email', true );
+$hotline = get_post_meta( $page_id, 'hotline', true );</code></pre>
+                </li>
+                <li>
+                    <strong>Trang xử lý logic ngầm:</strong> Trang xử lý form chuyển hướng (Redirect), Endpoint API trả về JSON, xử lý yêu cầu AJAX hoặc Webhook không render giao diện bài viết HTML.
+                </li>
+            </ol>
+
+            <!-- PHẦN 4 -->
+            <h2>IV. Điều gì xảy ra nếu XÓA The Loop ở trang bình thường?</h2>
+            <div class="note">
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong><code>the_content()</code> có thể bị rỗng hoặc lỗi:</strong> Bộ lọc shortcode, tự ngắt dòng thẻ <code>&lt;p&gt;</code> (wpautop) và nhúng media video oEmbed không được kích hoạt đầy đủ.</li>
+                    <li><strong><code>the_title()</code> có thể in sai:</strong> Nếu trang web có một truy vấn phụ (như widget ở sidebar hoặc thanh header) chạy trước đó mà quên reset, <code>the_title()</code> sẽ in nhầm tiêu đề của bài viết cuối cùng trong widget đó!</li>
+                    <li><strong>Plugin SEO hoạt động sai lệch:</strong> Các plugin như Yoast SEO, Rank Math lắng nghe hook của <code>the_post()</code> để tự động phân tích từ khóa, tạo Canonical URL và sinh thẻ meta description chính xác.</li>
+                </ul>
+            </div>
+
+            <!-- PHẦN 5 -->
+            <h2>V. Bảng tổng kết nhanh: Khi nào cần / không cần?</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Loại Template</th>
+                        <th>Nên dùng The Loop?</th>
+                        <th>Lý do kỹ thuật</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Archive / Category / Tag / Search</strong></td>
+                        <td><strong>BẮT BUỘC</strong></td>
+                        <td>Duyệt qua từng bài viết trong danh sách kết quả truy vấn.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Single bài viết / Custom Post Type</strong></td>
+                        <td><strong>RẤT NÊN DÙNG</strong></td>
+                        <td>Để <code>the_content()</code>, khung bình luận và plugin SEO hoạt động chuẩn.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Page tĩnh có dùng Editor Admin</strong></td>
+                        <td><strong>RẤT NÊN DÙNG</strong></td>
+                        <td>Tự động gán ID và hiển thị nội dung trang hiện tại.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trang Landing Page HTML tĩnh</strong></td>
+                        <td><strong>KHÔNG CẦN</strong></td>
+                        <td>Toàn bộ HTML đã được viết cố định trực tiếp trong file code.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom Query (<code>new WP_Query</code>)</strong></td>
+                        <td><strong>BẮT BUỘC</strong></td>
+                        <td>Duyệt qua danh sách bài của câu query tùy biến (nhớ kèm <code>wp_reset_postdata()</code>).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="page-nav">
+                <a href="page-cung.html">← Tạo Page cứng</a>
+                <a href="dang-ky-post-type.html" class="next">Đăng ký Post Type, Taxonomy, Option →</a>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+
