@@ -84,8 +84,62 @@ function theme_enqueue_assets() {
     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
         wp_enqueue_script( 'comment-reply' );
     }
+
+    // 5. Tự động nạp CSS & JS chuyên biệt theo từng trang nếu có file trong assets/
+    if ( is_front_page() ) {
+        theme_auto_enqueue_asset( 'front-page' );
+    } elseif ( is_page() ) {
+        $slug = get_post_field( 'post_name', get_queried_object_id() );
+        theme_auto_enqueue_asset( 'page' );
+        if ( $slug ) {
+            theme_auto_enqueue_asset( "page-{$slug}" );
+        }
+    } elseif ( is_singular() ) {
+        $post_type = get_post_type();
+        theme_auto_enqueue_asset( 'single' );
+        if ( $post_type ) {
+            theme_auto_enqueue_asset( "single-{$post_type}" );
+        }
+    } elseif ( is_post_type_archive() ) {
+        $post_type = get_query_var( 'post_type' );
+        theme_auto_enqueue_asset( 'archive' );
+        if ( $post_type ) {
+            theme_auto_enqueue_asset( "archive-{$post_type}" );
+        }
+    } elseif ( is_category() ) {
+        theme_auto_enqueue_asset( 'category' );
+    } elseif ( is_tag() ) {
+        theme_auto_enqueue_asset( 'tag' );
+    } elseif ( is_tax() ) {
+        $taxonomy = get_query_var( 'taxonomy' );
+        theme_auto_enqueue_asset( 'taxonomy' );
+        if ( $taxonomy ) {
+            theme_auto_enqueue_asset( "taxonomy-{$taxonomy}" );
+        }
+    } elseif ( is_search() ) {
+        theme_auto_enqueue_asset( 'search' );
+    } elseif ( is_404() ) {
+        theme_auto_enqueue_asset( '404' );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'theme_enqueue_assets' );
+
+/**
+ * Hàm trợ giúp: Tự kiểm tra nếu file có trong assets/css/ hoặc assets/js/ thì mới nạp
+ */
+function theme_auto_enqueue_asset( $name ) {
+    // Tự nạp CSS riêng nếu có
+    $css_file = THEME_DIR . "/assets/css/{$name}.css";
+    if ( file_exists( $css_file ) ) {
+        wp_enqueue_style( "theme-{$name}-style", THEME_URI . "/assets/css/{$name}.css", array( 'theme-main-style' ), filemtime( $css_file ) );
+    }
+
+    // Tự nạp JS riêng nếu có
+    $js_file = THEME_DIR . "/assets/js/{$name}.js";
+    if ( file_exists( $js_file ) ) {
+        wp_enqueue_script( "theme-{$name}-script", THEME_URI . "/assets/js/{$name}.js", array( 'theme-main-script' ), filemtime( $js_file ), true );
+    }
+}
 
 /* ==========================================================================
    3. NẠP CÁC MODULE TỪ THƯ MỤC INC/ (NGUYÊN TẮC BÓC TÁCH MODULE)
@@ -105,7 +159,12 @@ if ( file_exists( THEME_DIR . '/inc/custom-taxonomies.php' ) ) {
     require_once THEME_DIR . '/inc/custom-taxonomies.php';
 }
 
-// 4. Bộ khung Custom Fields thay thế ACF (Meta boxes, Term meta, Option page)
+// 4. Trang Cài đặt Theme (Option Page)
+if ( file_exists( THEME_DIR . '/inc/custom-option-page.php' ) ) {
+    require_once THEME_DIR . '/inc/custom-option-page.php';
+}
+
+// 5. Bộ khung Custom Fields thay thế ACF (Meta boxes, Term meta...)
 if ( file_exists( THEME_DIR . '/inc/fields/loader.php' ) ) {
     require_once THEME_DIR . '/inc/fields/loader.php';
 }
@@ -116,14 +175,6 @@ if ( file_exists( THEME_DIR . '/inc/fields/loader.php' ) ) {
 function theme_optimize_archive_queries( $query ) {
     // Chỉ can thiệp ngoài giao diện frontend và là truy vấn chính (Main Query)
     if ( ! is_admin() && $query->is_main_query() ) {
-
-        // Phân trang và sắp xếp cho Archive Sản phẩm & Taxonomy Loại sản phẩm
-        if ( is_post_type_archive( 'san-pham' ) || is_tax( 'loai-san-pham' ) ) {
-            $query->set( 'posts_per_page', 12 ); // 12 bài mỗi trang
-            $query->set( 'orderby', 'date' );
-            $query->set( 'order', 'DESC' );
-        }
-
         // Tùy biến số lượng kết quả trên trang Tìm kiếm
         if ( $query->is_search() ) {
             $query->set( 'posts_per_page', 10 );
@@ -156,3 +207,4 @@ add_filter( 'upload_mimes', function( $mimes ) {
     return $mimes;
 } );
 
+add_filter( 'use_block_editor_for_post_type', '__return_false', 10 );
