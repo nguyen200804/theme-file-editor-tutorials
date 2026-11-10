@@ -178,15 +178,27 @@ endwhile;</code></pre>
                 </tr>
                 <tr>
                     <td><code>the_title()</code></td>
-                    <td>In ra tiêu đề bài viết.</td>
+                    <td>In ra tiêu đề bài viết hiện tại.</td>
                 </tr>
                 <tr>
                     <td><code>the_content()</code></td>
-                    <td>In ra toàn bộ nội dung trong trình soạn thảo.</td>
+                    <td>In ra toàn bộ nội dung trong trình soạn thảo, tự chạy shortcode và oEmbed.</td>
                 </tr>
                 <tr>
                     <td><code>the_post_thumbnail('size')</code></td>
                     <td>In thẻ <code>&lt;img&gt;</code> ảnh đại diện theo kích thước chỉ định (<code>thumbnail</code>, <code>medium</code>, <code>large</code>, <code>full</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>get_the_date()</code> / <code>the_time()</code></td>
+                    <td>Lấy hoặc in ngày giờ đăng bài viết theo định dạng tùy chọn.</td>
+                </tr>
+                <tr>
+                    <td><code>the_category()</code> / <code>the_terms()</code></td>
+                    <td>In danh sách chuyên mục của bài viết hoặc taxonomy của Custom Post Type.</td>
+                </tr>
+                <tr>
+                    <td><code>the_tags()</code></td>
+                    <td>In danh sách các thẻ bài viết (Tags) có liên kết.</td>
                 </tr>
                 <tr>
                     <td><code>get_post_type_archive_link('pt')</code></td>
@@ -198,9 +210,128 @@ endwhile;</code></pre>
                 </tr>
                 <tr>
                     <td><code>comments_template()</code></td>
-                    <td>Nạp khung bình luận và đánh giá của WordPress.</td>
+                    <td>Nạp khung bình luận và form gửi đánh giá của WordPress.</td>
                 </tr>
             </table>
+
+            <h3>Ví dụ code mẫu chi tiết cách gọi từng hàm trong thực tế:</h3>
+
+            <h4>1. Tiêu đề, Ngày đăng &amp; Thông tin tác giả</h4>
+            <pre><code>&lt;!-- In tiêu đề bài viết --&gt;
+&lt;h1 class="entry-title"&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
+
+&lt;!-- Thanh thông tin meta: tác giả, ngày đăng, giờ đăng --&gt;
+&lt;div class="entry-meta"&gt;
+    &lt;span class="meta-author"&gt;
+        &lt;?php echo get_avatar( get_the_author_meta( 'ID' ), 28 ); ?&gt;
+        Tác giả: &lt;strong&gt;&lt;?php the_author(); ?&gt;&lt;/strong&gt;
+    &lt;/span&gt;
+
+    &lt;span class="meta-date"&gt;
+        Đăng ngày: &lt;time datetime="&lt;?php echo esc_attr( get_the_date( 'c' ) ); ?&gt;"&gt;&lt;?php echo esc_html( get_the_date( 'd/m/Y' ) ); ?&gt;&lt;/time&gt;
+    &lt;/span&gt;
+
+    &lt;span class="meta-time"&gt;
+        Lúc: &lt;?php the_time( 'H:i' ); ?&gt;
+    &lt;/span&gt;
+&lt;/div&gt;</code></pre>
+
+            <h4>2. Ảnh đại diện (Featured Image &amp; Background Hero Banner)</h4>
+            <pre><code>&lt;!-- Cách 1: In thẻ img trực tiếp (kèm kiểm tra và chú thích ảnh) --&gt;
+&lt;?php if ( has_post_thumbnail() ) : ?&gt;
+    &lt;figure class="post-featured-image"&gt;
+        &lt;?php the_post_thumbnail( 'large', array( 'class' =&gt; 'img-fluid', 'alt' =&gt; the_title_attribute( 'echo=0' ) ) ); ?&gt;
+        &lt;?php if ( $caption = get_the_post_thumbnail_caption() ) : ?&gt;
+            &lt;figcaption&gt;&lt;?php echo esc_html( $caption ); ?&gt;&lt;/figcaption&gt;
+        &lt;?php endif; ?&gt;
+    &lt;/figure&gt;
+&lt;?php endif; ?&gt;
+
+&lt;!-- Cách 2: Lấy link URL ảnh đại diện để làm background banner --&gt;
+&lt;?php
+$banner_url = has_post_thumbnail() 
+    ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) 
+    : get_template_directory_uri() . '/assets/images/default-banner.jpg';
+?&gt;
+&lt;div class="post-hero" style="background-image: url('&lt;?php echo esc_url( $banner_url ); ?&gt;');"&gt;
+    &lt;div class="container"&gt;
+        &lt;h1&gt;&lt;?php the_title(); ?&gt;&lt;/h1&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            <h4>3. Chuyên mục, Taxonomy &amp; Thẻ Tags</h4>
+            <pre><code>&lt;!-- In chuyên mục bài viết chuẩn (Post Category) --&gt;
+&lt;div class="post-categories"&gt;
+    &lt;span class="label"&gt;Chuyên mục:&lt;/span&gt; &lt;?php the_category( ', ' ); ?&gt;
+&lt;/div&gt;
+
+&lt;!-- In nhóm phân loại của Custom Post Type (ví dụ taxonomy 'loai-san-pham') --&gt;
+&lt;div class="cpt-terms"&gt;
+    &lt;?php the_terms( get_the_ID(), 'loai-san-pham', '&lt;span class="label"&gt;Phân loại: &lt;/span&gt;', ', ', '' ); ?&gt;
+&lt;/div&gt;
+
+&lt;!-- In danh sách thẻ Tags có icon --&gt;
+&lt;?php if ( has_tag() ) : ?&gt;
+    &lt;div class="post-tags"&gt;
+        &lt;?php the_tags( '&lt;span class="tag-title"&gt;🏷️ Thẻ:&lt;/span&gt; ', ' ' ); ?&gt;
+    &lt;/div&gt;
+&lt;?php endif; ?&gt;</code></pre>
+
+            <h4>4. Điều hướng bài viết Trước / Sau (Previous &amp; Next Post Link)</h4>
+            <pre><code>&lt;nav class="post-navigation" aria-label="Điều hướng bài viết"&gt;
+    &lt;div class="nav-links" style="display: flex; justify-content: space-between; gap: 16px; margin: 30px 0;"&gt;
+        &lt;div class="nav-previous"&gt;
+            &lt;?php
+            // Tham số 3 ($in_same_term = true): Chỉ chuyển các bài trong cùng chuyên mục
+            previous_post_link( 
+                '&lt;span class="nav-subtitle"&gt;&amp;larr; Bài trước&lt;/span&gt;&lt;div class="nav-title"&gt;%link&lt;/div&gt;', 
+                '%title', 
+                true 
+            ); 
+            ?&gt;
+        &lt;/div&gt;
+
+        &lt;div class="nav-archive"&gt;
+            &lt;!-- Nút quay về trang danh sách của Post Type hiện tại --&gt;
+            &lt;a href="&lt;?php echo esc_url( get_post_type_archive_link( get_post_type() ) ?: home_url( '/blog/' ) ); ?&gt;" class="btn-archive"&gt;
+                Tất cả bài viết
+            &lt;/a&gt;
+        &lt;/div&gt;
+
+        &lt;div class="nav-next" style="text-align: right;"&gt;
+            &lt;?php 
+            next_post_link( 
+                '&lt;span class="nav-subtitle"&gt;Bài tiếp theo &amp;rarr;&lt;/span&gt;&lt;div class="nav-title"&gt;%link&lt;/div&gt;', 
+                '%title', 
+                true 
+            ); 
+            ?&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+
+            <h4>5. Nhúng khung bình luận chuẩn WordPress</h4>
+            <pre><code>&lt;?php
+// Chỉ nạp template bình luận (comments.php) khi bài viết mở tính năng comment hoặc đã có bình luận cũ
+if ( comments_open() || get_comments_number() ) :
+    comments_template();
+endif;
+?&gt;</code></pre>
+
+            <h4>6. Ước tính thời gian đọc bài (Reading Time)</h4>
+            <pre><code>&lt;?php
+// Tính thời gian đọc trung bình (200 từ / phút)
+ = get_post_field( 'post_content', get_the_ID() );
+   = str_word_count( strip_tags(  ) );
+ = max( 1, ceil(  / 200 ) );
+?&gt;
+&lt;span class="reading-time"&gt;
+    ⏱️ Khoảng &lt;strong&gt;&lt;?php echo esc_html( $caption ); ?&gt;&lt;/strong&gt; phút đọc
+&lt;/span&gt;</code></pre>
+
+            <div class="note">
+                👉 <em>Xem thêm bảng tổng hợp đầy đủ các hàm lấy dữ liệu bài viết và dữ liệu bình luận tại: <a href="tra-cuu-du-lieu.html">Tra cứu hàm lấy dữ liệu</a></em>.
+            </div>
 
             <div class="page-nav">
                 <a href="pagination.html">← Custom UI Pagination</a>
@@ -212,6 +343,9 @@ endwhile;</code></pre>
 </body>
 
 </html>
+
+
+
 
 
 
